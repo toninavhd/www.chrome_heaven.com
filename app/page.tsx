@@ -1,0 +1,1078 @@
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+
+// Windows 95/98 Pixel-Art SVGs
+const MyComputerIcon = () => (
+  <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* CRT Monitor Outer casing */}
+    <rect x="4" y="3" width="18" height="13" fill="#c0c0c0" stroke="#000" strokeWidth="1" />
+    {/* Bezel */}
+    <rect x="6" y="5" width="14" height="9" fill="#dfdfdf" />
+    {/* Screen */}
+    <rect x="8" y="7" width="10" height="5" fill="#000" />
+    <rect x="9" y="8" width="8" height="3" fill="#008080" />
+    {/* Base Stand */}
+    <path d="M9 16 L17 16 L19 20 L7 20 Z" fill="#808080" stroke="#000" strokeWidth="1" />
+    <rect x="6" y="20" width="14" height="1" fill="#c0c0c0" />
+    {/* Tower Case */}
+    <rect x="23" y="6" width="6" height="15" fill="#c0c0c0" stroke="#000" strokeWidth="1" />
+    <rect x="23" y="6" width="1" height="15" fill="#ffffff" />
+    {/* Floppy drive */}
+    <line x1="25" y1="9" x2="27" y2="9" stroke="#000" strokeWidth="1" />
+    {/* CD ROM */}
+    <line x1="25" y1="12" x2="27" y2="12" stroke="#808080" strokeWidth="1" />
+    {/* Power buttons */}
+    <circle cx="26" cy="18" r="0.7" fill="#00ff00" />
+  </svg>
+);
+
+const FolderIcon = () => (
+  <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Folder back tab */}
+    <path d="M2 6 L11 6 L13 9 L28 9 L28 26 L2 26 Z" fill="#b08030" stroke="#000" strokeWidth="1" />
+    {/* Paper insert showing */}
+    <rect x="5" y="7" width="16" height="5" fill="#ffffff" stroke="#808080" strokeWidth="0.8" />
+    {/* Folder front cover (slanted and brighter yellow) */}
+    <path d="M2 10 L26 10 L28 26 L2 26 Z" fill="#f0c050" stroke="#000" strokeWidth="1" />
+    <path d="M3 11 L25 11 L27 25 L3 25 Z" fill="#ffd870" />
+  </svg>
+);
+
+const TextDocIcon = () => (
+  <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* White Paper Sheet */}
+    <path d="M5 2 L19 2 L25 8 L25 29 L5 29 Z" fill="#ffffff" stroke="#000" strokeWidth="1" />
+    {/* Folded Corner */}
+    <path d="M19 2 L19 8 L25 8 Z" fill="#c0c0c0" stroke="#000" strokeWidth="1" />
+    {/* Blue lined notepad lines */}
+    <line x1="8" y1="12" x2="22" y2="12" stroke="#0000d0" strokeWidth="0.8" opacity="0.7" />
+    <line x1="8" y1="16" x2="22" y2="16" stroke="#0000d0" strokeWidth="0.8" opacity="0.7" />
+    <line x1="8" y1="20" x2="22" y2="20" stroke="#0000d0" strokeWidth="0.8" opacity="0.7" />
+    <line x1="8" y1="24" x2="17" y2="24" stroke="#0000d0" strokeWidth="0.8" opacity="0.7" />
+    {/* Pencil overlay */}
+    <path d="M20 22 L27 29 L29 27 L22 20 Z" fill="#e0a000" stroke="#000" strokeWidth="0.8" />
+    <path d="M27 29 L28 28 L29 27 Z" fill="#ff0000" />
+  </svg>
+);
+
+const MediaPlayerIcon = () => (
+  <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Speaker box shape */}
+    <rect x="4" y="4" width="24" height="24" fill="#c0c0c0" stroke="#000" strokeWidth="1.2" />
+    <rect x="5" y="5" width="22" height="22" fill="#d8d8d8" />
+    {/* Speaker cone circle */}
+    <circle cx="16" cy="16" r="10" fill="#a0a0a0" stroke="#000" strokeWidth="1" />
+    <circle cx="16" cy="16" r="8" fill="#404040" />
+    <circle cx="16" cy="16" r="4" fill="#808080" />
+    {/* CD overlay */}
+    <circle cx="22" cy="22" r="7" fill="#ffffff" stroke="#000" strokeWidth="1" />
+    <circle cx="22" cy="22" r="6" fill="#e0f0ff" />
+    <circle cx="22" cy="22" r="2" fill="#000080" />
+  </svg>
+);
+
+const IEIcon = () => (
+  <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Classic Windows 95 Blue e */}
+    <path d="M26 15 C26 7 20 5 15 5 C8 5 4 10 4 17 C4 24 9 27 16 27 C23 27 26 23 26 17 L9 17 C9 19 11 22 16 22 C20 22 22 20 22 17" stroke="#1080f0" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+    <path d="M11 13 L26 13" stroke="#1080f0" strokeWidth="3.5" strokeLinecap="round" />
+    {/* Gold ring swoosh orbit */}
+    <path d="M2 20 C10 12 22 8 30 12 C32 13 30 16 26 17 C18 19 8 20 2 20 Z" fill="#ffb000" stroke="#a07000" strokeWidth="0.8" opacity="0.9" />
+  </svg>
+);
+
+const RecycleBinIcon = () => (
+  <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Gray can body */}
+    <path d="M7 8 L25 8 L22 28 L10 28 Z" fill="#d0d0d0" stroke="#000" strokeWidth="1" />
+    {/* Rim ring */}
+    <ellipse cx="16" cy="8" rx="9" ry="2.5" fill="#808080" stroke="#000" strokeWidth="1" />
+    {/* Ribs / stripes of the bin */}
+    <line x1="11" y1="9" x2="12" y2="28" stroke="#808080" strokeWidth="1.2" />
+    <line x1="16" y1="9" x2="16" y2="28" stroke="#808080" strokeWidth="1.2" />
+    <line x1="21" y1="9" x2="20" y2="28" stroke="#808080" strokeWidth="1.2" />
+    {/* Crumpled paper pieces */}
+    <path d="M12 5 L16 3 L19 6 L15 7 Z" fill="#ffffff" stroke="#808080" strokeWidth="0.8" />
+  </svg>
+);
+
+const ImageFileIcon = () => (
+  <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="4" width="22" height="24" fill="#ffffff" stroke="#000" strokeWidth="1" />
+    {/* Sun */}
+    <circle cx="12" cy="11" r="3" fill="#ffd700" stroke="#b8860b" strokeWidth="0.8" />
+    {/* Mountains/landscape inside */}
+    <path d="M7 24 L15 15 L21 21 L25 17 L25 24 Z" fill="#008000" stroke="#004000" strokeWidth="0.8" />
+  </svg>
+);
+
+// Start Menu Flag Logo (Windows 95 style)
+const Win95Logo = () => (
+  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="2" width="6" height="5" fill="#ff4040" stroke="#000" strokeWidth="0.5" />
+    <rect x="8" y="2" width="7" height="5" fill="#40ff40" stroke="#000" strokeWidth="0.5" />
+    <rect x="1" y="8" width="6" height="5" fill="#4040ff" stroke="#000" strokeWidth="0.5" />
+    <rect x="8" y="8" width="7" height="5" fill="#ffff40" stroke="#000" strokeWidth="0.5" />
+  </svg>
+);
+
+// Small status bar / system tray icons
+const VolumeIcon = () => (
+  <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M2 5v6h3l4 4V1L5 5H2zm9 3c0-1.8-1-3.3-2.5-4v8c1.5-.7 2.5-2.2 2.5-4z"/>
+  </svg>
+);
+
+const NetworkIcon = () => (
+  <svg className="w-4 h-4 text-black" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="2" width="6" height="5" fill="#c0c0c0" stroke="#000" strokeWidth="0.8" />
+    <rect x="2" y="3" width="4" height="3" fill="#00ffff" />
+    <rect x="9" y="8" width="6" height="5" fill="#c0c0c0" stroke="#000" strokeWidth="0.8" />
+    <rect x="10" y="9" width="4" height="3" fill="#00ff00" />
+    <path d="M4 11 L12 5" stroke="#000" strokeWidth="1" />
+  </svg>
+);
+
+interface Track {
+  id: string;
+  title: string;
+  artist: string;
+  genre: string;
+  soundcloudEmbedUrl: string;
+  audioUrl?: string;
+  spotifyUrl?: string;
+  bandcampUrl?: string;
+}
+
+const buildSoundCloudEmbedUrl = (slug: string) => `https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/uloee/${slug}&color=%23082468&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false&buying=false&download=false&sharing=false&show_playcount=false`;
+
+const TRACK_SLUG_MAP: { [key: string]: string } = {
+  malice: 'malice',
+  'bleedmeariver': 'bleedmeariver',
+};
+
+const TRACKS: Track[] = [
+  {
+    id: 'malice',
+    title: 'ｍａｌｉｃｅ [EP]',
+    artist: 'Chrome Heaven',
+    genre: 'Electronic / Dreamcore',
+    soundcloudEmbedUrl: buildSoundCloudEmbedUrl('malice'),
+  },
+  {
+    id: 'bleedmeariver',
+    title: 'BleedMeARiver',
+    artist: 'Chrome Heaven',
+    genre: 'Electronic',
+    soundcloudEmbedUrl: buildSoundCloudEmbedUrl('bleedmeariver'),
+  },
+];
+
+const BATTERY_CELLS = 10;
+
+interface GalleryItem {
+  id: string;
+  name: string;
+  src: string;
+  tag: string;
+}
+
+const GALLERY_ITEMS: GalleryItem[] = [
+  { id: 'g1', name: 'paris_2023.bmp', src: '/images/gallery_1.png', tag: 'Paris2023' },
+  { id: 'g2', name: 'lost_in_fantasy.bmp', src: '/images/gallery_2.png', tag: 'lost-in-a-fantasy' },
+  { id: 'g3', name: 'how_to_start_cult.bmp', src: '/images/gallery_3.png', tag: 'how-2-start-a-cult' },
+  { id: 'g4', name: 'nothin_2_say.bmp', src: '/images/gallery_4.png', tag: 'nothin-2-say' },
+  { id: 'g5', name: 'malice_cover.bmp', src: '/images/malice_ep_cover.png', tag: 'malice' },
+  { id: 'g6', name: 'avatar_uloe.bmp', src: '/images/avatar.png', tag: 'uloee' },
+];
+
+interface WindowState {
+  id: string;
+  title: string;
+  isOpen: boolean;
+  isMinimized: boolean;
+  isMaximized: boolean;
+  x: number;
+  y: number;
+  width: number | string;
+  height: number | string;
+  icon: React.ReactNode;
+}
+
+const WALLPAPERS = [
+  { id: 'fence', name: 'Fence Tile', value: 'url("https://sadhost.neocities.org/images/tiles/fence.gif")', type: 'tile' },
+  { id: 'classic', name: 'Classic Teal', value: '#386ca0', type: 'color' },
+  { id: 'clouds', name: 'Heavenly Clouds', value: 'url("https://win98icons.alexmeub.com/images/wallpapers/clouds.png")', type: 'cover' },
+  { id: 'violet', name: 'Deep Violet', value: '#120c1f', type: 'color' },
+];
+
+export default function Home() {
+  const [windows, setWindows] = useState<WindowState[]>([
+    {
+      id: 'welcome',
+      title: 'Welcome.txt - Notepad',
+      isOpen: true,
+      isMinimized: false,
+      isMaximized: false,
+      x: 30,
+      y: 30,
+      width: 480,
+      height: 380,
+      icon: <TextDocIcon />,
+    },
+    {
+      id: 'music',
+      title: 'Windows Media Player',
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      x: 100,
+      y: 70,
+      width: 620,
+      height: 480,
+      icon: <MediaPlayerIcon />,
+    },
+    {
+      id: 'gallery',
+      title: 'C:\\Visuals_and_Edits',
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      x: 150,
+      y: 110,
+      width: 520,
+      height: 360,
+      icon: <FolderIcon />,
+    },
+    {
+      id: 'links',
+      title: 'Internet Explorer',
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      x: 70,
+      y: 90,
+      width: 580,
+      height: 460,
+      icon: <IEIcon />,
+    },
+    {
+      id: 'settings',
+      title: 'Display Properties',
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      x: 180,
+      y: 130,
+      width: 380,
+      height: 320,
+      icon: <MyComputerIcon />,
+    },
+    {
+      id: 'viewer',
+      title: 'Windows Image Viewer',
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      x: 220,
+      y: 50,
+      width: 500,
+      height: 450,
+      icon: <ImageFileIcon />,
+    },
+  ]);
+
+  const [activeWindowId, setActiveWindowId] = useState<string>('welcome');
+  const [selectedDesktopIcon, setSelectedDesktopIcon] = useState<string | null>(null);
+  const [startMenuOpen, setStartMenuOpen] = useState(false);
+  const [time, setTime] = useState('');
+  const [currentTrack, setCurrentTrack] = useState<Track>(TRACKS[0]);
+  const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
+  const [currentWallpaper, setCurrentWallpaper] = useState(WALLPAPERS[0]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [volume, setVolume] = useState(0.85);
+  const [visualizerBars, setVisualizerBars] = useState<number[]>(Array.from({ length: BATTERY_CELLS }, () => 8));
+
+  const desktopRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      stopVisualizer();
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        void audioContextRef.current.close();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.pause();
+    audio.currentTime = 0;
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    stopVisualizer();
+  }, [currentTrack.id]);
+
+  // Update System Tray Clock
+  useEffect(() => {
+    const updateTime = () => {
+      const date = new Date();
+      let hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // the hour '0' should be '12'
+      setTime(`${hours}:${minutes} ${ampm}`);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const stopVisualizer = () => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+  };
+
+  const startVisualizer = () => {
+    const audio = audioRef.current;
+    if (!audio || typeof window === 'undefined') return;
+
+    if (!audioContextRef.current) {
+      const AudioContextImpl = window.AudioContext || (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextImpl) return;
+      audioContextRef.current = new AudioContextImpl();
+    }
+
+    if (!analyserRef.current) {
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      analyserRef.current.fftSize = 256;
+      sourceRef.current = audioContextRef.current.createMediaElementSource(audio);
+      sourceRef.current.connect(analyserRef.current);
+      analyserRef.current.connect(audioContextRef.current.destination);
+    }
+
+    stopVisualizer();
+    const bufferLength = analyserRef.current!.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    const draw = () => {
+      if (!audioRef.current || audioRef.current.paused || audioRef.current.ended) {
+        setIsPlaying(false);
+        stopVisualizer();
+        return;
+      }
+
+      analyserRef.current?.getByteFrequencyData(dataArray);
+      const nextBars = Array.from({ length: BATTERY_CELLS }, (_, index) => {
+        const start = Math.floor((index / BATTERY_CELLS) * bufferLength);
+        const end = Math.floor(((index + 1) / BATTERY_CELLS) * bufferLength);
+        const average = dataArray.slice(start, end).reduce((sum, value) => sum + value, 0) / Math.max(1, end - start);
+        const height = Math.max(10, Math.min(48, Math.round((average / 255) * 42) + 6));
+        return height;
+      });
+
+      setVisualizerBars(nextBars);
+      animationFrameRef.current = requestAnimationFrame(draw);
+    };
+
+    draw();
+  };
+
+  const togglePlayback = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (audio.paused) {
+      void audio.play();
+      setIsPlaying(true);
+      startVisualizer();
+    } else {
+      audio.pause();
+      setIsPlaying(false);
+      stopVisualizer();
+    }
+  };
+
+  const stopPlayback = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0;
+    setIsPlaying(false);
+    setCurrentTime(0);
+    stopVisualizer();
+  };
+
+  const handleTimeUpdate = () => {
+    if (!audioRef.current) return;
+    setCurrentTime(audioRef.current.currentTime);
+  };
+
+  const handleMetadataLoaded = () => {
+    if (!audioRef.current) return;
+    setDuration(audioRef.current.duration || 0);
+  };
+
+  const openWindow = (id: string) => {
+    setWindows(prev => prev.map(win => {
+      if (win.id === id) {
+        return { ...win, isOpen: true, isMinimized: false };
+      }
+      return win;
+    }));
+    setActiveWindowId(id);
+    setStartMenuOpen(false);
+  };
+
+  const closeWindow = (id: string) => {
+    setWindows(prev => prev.map(win => {
+      if (win.id === id) {
+        return { ...win, isOpen: false };
+      }
+      return win;
+    }));
+  };
+
+  const minimizeWindow = (id: string) => {
+    setWindows(prev => prev.map(win => {
+      if (win.id === id) {
+        return { ...win, isMinimized: true };
+      }
+      return win;
+    }));
+  };
+
+  const toggleMaximize = (id: string) => {
+    setWindows(prev => prev.map(win => {
+      if (win.id === id) {
+        return { ...win, isMaximized: !win.isMaximized };
+      }
+      return win;
+    }));
+  };
+
+  const handleWindowClick = (id: string) => {
+    setActiveWindowId(id);
+  };
+
+  const playTrack = (track: Track) => {
+    setCurrentTrack(track);
+    openWindow('music');
+  };
+
+  const openImageViewer = (img: GalleryItem) => {
+    setSelectedImage(img);
+    openWindow('viewer');
+  };
+
+  return (
+    <div
+      ref={desktopRef}
+      className="relative w-screen h-screen overflow-hidden flex flex-col"
+      style={{
+        backgroundColor: currentWallpaper.type === 'color' ? currentWallpaper.value : undefined,
+        backgroundImage: currentWallpaper.type !== 'color' ? currentWallpaper.value : undefined,
+        backgroundSize: currentWallpaper.type === 'cover' ? 'cover' : 'auto',
+        backgroundPosition: currentWallpaper.type === 'cover' ? 'center center' : '0 0',
+        backgroundRepeat: currentWallpaper.type === 'tile' ? 'repeat' : 'no-repeat',
+      }}
+      onClick={() => {
+        setSelectedDesktopIcon(null);
+        setStartMenuOpen(false);
+      }}
+    >
+      {/* Desktop Area */}
+      <div className="flex-1 relative p-4 flex flex-col flex-wrap content-start items-start gap-3 select-none">
+        
+        {/* Desktop Shortcut Icons with Windows 95 Selection States */}
+        <div
+          className={`desktop-icon ${selectedDesktopIcon === 'welcome' ? 'selected' : ''}`}
+          onClick={(e) => { e.stopPropagation(); setSelectedDesktopIcon('welcome'); }}
+          onDoubleClick={() => openWindow('welcome')}
+        >
+          <TextDocIcon />
+          <div className="desktop-icon-text">Welcome.txt</div>
+        </div>
+
+        <div
+          className={`desktop-icon ${selectedDesktopIcon === 'music' ? 'selected' : ''}`}
+          onClick={(e) => { e.stopPropagation(); setSelectedDesktopIcon('music'); }}
+          onDoubleClick={() => openWindow('music')}
+        >
+          <MediaPlayerIcon />
+          <div className="desktop-icon-text">Media Player</div>
+        </div>
+
+        <div
+          className={`desktop-icon ${selectedDesktopIcon === 'gallery' ? 'selected' : ''}`}
+          onClick={(e) => { e.stopPropagation(); setSelectedDesktopIcon('gallery'); }}
+          onDoubleClick={() => openWindow('gallery')}
+        >
+          <FolderIcon />
+          <div className="desktop-icon-text">Visuals Folder</div>
+        </div>
+
+        <div
+          className={`desktop-icon ${selectedDesktopIcon === 'links' ? 'selected' : ''}`}
+          onClick={(e) => { e.stopPropagation(); setSelectedDesktopIcon('links'); }}
+          onDoubleClick={() => openWindow('links')}
+        >
+          <IEIcon />
+          <div className="desktop-icon-text">Internet Explorer</div>
+        </div>
+
+        <div
+          className={`desktop-icon ${selectedDesktopIcon === 'settings' ? 'selected' : ''}`}
+          onClick={(e) => { e.stopPropagation(); setSelectedDesktopIcon('settings'); }}
+          onDoubleClick={() => openWindow('settings')}
+        >
+          <MyComputerIcon />
+          <div className="desktop-icon-text">Display Properties</div>
+        </div>
+
+        <div
+          className={`desktop-icon ${selectedDesktopIcon === 'recycle' ? 'selected' : ''}`}
+          onClick={(e) => { e.stopPropagation(); setSelectedDesktopIcon('recycle'); }}
+          onDoubleClick={() => alert("The Recycle Bin is empty.")}
+        >
+          <RecycleBinIcon />
+          <div className="desktop-icon-text">Recycle Bin</div>
+        </div>
+
+        {/* Windows rendering */}
+        {windows.map((win) => {
+          if (!win.isOpen) return null;
+          const isActive = activeWindowId === win.id;
+          const isMin = win.isMinimized;
+
+          return (
+            <motion.div
+              key={win.id}
+              drag
+              dragMomentum={false}
+              dragConstraints={desktopRef}
+              initial={win.isMaximized ? { x: 0, y: 0 } : { x: win.x, y: win.y }}
+              animate={
+                win.isMaximized
+                  ? { x: 0, y: 0, width: '100%', height: 'calc(100vh - 38px)' }
+                  : { x: win.x, y: win.y, width: win.width, height: win.height }
+              }
+              style={{
+                zIndex: isActive ? 30 : 10,
+                display: isMin ? 'none' : 'flex',
+                flexDirection: 'column',
+              }}
+              className="absolute win2k-window"
+              onClick={() => handleWindowClick(win.id)}
+            >
+              {/* Title Bar */}
+              <div className={`win2k-title-bar ${isActive ? '' : 'inactive'}`}>
+                <div className="flex items-center gap-1.5 font-bold text-[11px] truncate flex-1 win2k-title-bar-drag h-full py-1 cursor-default">
+                  <div className="w-4 h-4 scale-75 flex-shrink-0 flex items-center justify-center">
+                    {win.icon}
+                  </div>
+                  <span className="truncate">{win.title}</span>
+                </div>
+                
+                {/* Title buttons */}
+                <div className="flex gap-1 pl-2">
+                  <button className="win2k-title-btn" onClick={() => minimizeWindow(win.id)} aria-label="Minimize">_</button>
+                  <button className="win2k-title-btn" onClick={() => toggleMaximize(win.id)} aria-label="Maximize">
+                    {win.isMaximized ? '❐' : '⬜'}
+                  </button>
+                  <button className="win2k-title-btn font-bold text-red-700 font-sans" onClick={() => closeWindow(win.id)} aria-label="Close">X</button>
+                </div>
+              </div>
+
+              {/* Menu Bar */}
+              <div className="win2k-menu bg-[#d0d0c8] select-none">
+                <span className="win2k-menu-item">File</span>
+                <span className="win2k-menu-item">Edit</span>
+                <span className="win2k-menu-item">View</span>
+                <span className="win2k-menu-item">Help</span>
+              </div>
+
+              {/* Window Content Area */}
+              <div className="flex-1 bg-white overflow-hidden flex flex-col p-1.5">
+                <div className="flex-1 win2k-border-inset overflow-y-auto win2k-scroll text-black p-3 bg-white font-sans text-[12px] select-text">
+                  
+                  {/* welcome notepad */}
+                  {win.id === 'welcome' && (
+                    <div className="leading-relaxed whitespace-pre-wrap select-text">
+                      <p className="font-bold text-lg border-b pb-1 mb-2 font-display uppercase tracking-wider text-blue-900">Chrome Heaven — 影が届くまで</p>
+                      <p className="italic text-gray-500 mb-4">File Created: January 5, 2023</p>
+                      
+                      <p className="mb-4">
+                        Welcome to my official portfolio space. I am a musical project and visual creator based in Tenerife (Canary Islands).
+                      </p>
+                      
+                      <p className="mb-4">
+                        Here you can explore my projects under different aliases like Uloe, Till I Die, and Chrome Heaven.
+                      </p>
+                      
+                      <h3 className="font-bold text-blue-900 mt-4 mb-2">Instructions:</h3>
+                      <ul className="list-disc pl-5 mb-4">
+                        <li>Open <span className="underline cursor-pointer text-blue-800" onClick={() => openWindow('music')}>Media Player</span> to listen to my SoundCloud uploads.</li>
+                        <li>Open the <span className="underline cursor-pointer text-blue-800" onClick={() => openWindow('gallery')}>Visuals Folder</span> to check my photography edits.</li>
+                        <li>Open <span className="underline cursor-pointer text-blue-800" onClick={() => openWindow('links')}>Internet Explorer</span> to find all my social link profiles.</li>
+                      </ul>
+                      
+                      <p className="text-right mt-8 text-gray-400 font-mono text-[10px]">
+                        @chrome_heaven
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Windows Media Player */}
+                  {win.id === 'music' && (
+                    <div className="flex flex-col md:flex-row gap-4 h-full">
+                      {/* Left: Tracks Playlist */}
+                      <div className="w-full md:w-2/5 flex flex-col gap-2 border-r pr-3 select-none">
+                        <div className="font-bold text-blue-900 border-b pb-1 mb-1">Now Playing</div>
+                        <div className="flex-1 overflow-y-auto max-h-[300px] pr-1 win2k-scroll">
+                          {TRACKS.map((t) => (
+                            <div
+                              key={t.id}
+                              className={`p-2 border-b cursor-pointer text-[11px] ${
+                                currentTrack.id === t.id ? 'bg-[#000080] text-white font-bold' : 'hover:bg-gray-100'
+                              }`}
+                              onClick={() => setCurrentTrack(t)}
+                            >
+                              <div className="truncate">{t.artist}</div>
+                              <div className="truncate opacity-90">{t.title}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Right: Custom visual player */}
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div className="win2k-border-inset p-2 bg-[#f1f1f1] overflow-hidden h-[320px]">
+                          <div className="flex h-full flex-col">
+                            <div className="mb-2 border-b border-gray-300 pb-2">
+                              <div className="text-[10px] uppercase tracking-[0.2em] text-gray-600">Now playing</div>
+                              <div className="text-[12px] font-bold text-blue-900">{currentTrack.title}</div>
+                              <div className="text-[11px] text-gray-700">{currentTrack.artist} · {currentTrack.genre}</div>
+                            </div>
+
+                            <div className="mb-2 rounded-sm border border-gray-400 bg-[#0f1021] p-3">
+                              <div className="flex items-center justify-between">
+                                <div className="text-[10px] uppercase tracking-[0.2em] text-[#8cb6ff]">Reactive visualizer</div>
+                                <div className="text-[10px] text-[#cfe1ff]">{isPlaying ? 'Playing' : 'Paused'}</div>
+                              </div>
+                              <div className="wmp-battery-shell mt-3 p-3">
+                                <div className="wmp-battery-tip" />
+                                <div className="wmp-battery-grid">
+                                  {visualizerBars.map((height, index) => {
+                                    const level = Math.round((height / 54) * 100);
+                                    const fillColor = level > 66 ? '#6df16d' : level > 33 ? '#f4e651' : '#ff6262';
+                                    return (
+                                      <div key={index} className="wmp-battery-cell">
+                                        <div
+                                          className="wmp-battery-cell-fill"
+                                          style={{ height: `${height}px`, background: `linear-gradient(to top, ${fillColor}, #0f3969)` }}
+                                        />
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                              <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="flex gap-2">
+                                  <button className="win2k-btn px-2 py-0.5 text-[10px]" onClick={togglePlayback}>
+                                    {isPlaying ? 'Pause' : 'Play'}
+                                  </button>
+                                  <button className="win2k-btn px-2 py-0.5 text-[10px]" onClick={stopPlayback}>
+                                    Stop
+                                  </button>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <label className="text-[10px] uppercase tracking-[0.15em] text-gray-600">Volume</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="1"
+                                    step="0.01"
+                                    value={volume}
+                                    onChange={(event) => setVolume(Number(event.target.value))}
+                                    className="h-2 w-24 accent-blue-900"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex-1 min-h-0 overflow-hidden rounded-sm border border-gray-400 bg-black p-3 text-[11px] text-gray-200">
+                              <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-[#8cb6ff]">
+                                <span>Native audio player</span>
+                                <span>{currentTime > 0 ? `${Math.floor(currentTime / 60)}:${String(Math.floor(currentTime % 60)).padStart(2, '0')}` : '00:00'}/{duration > 0 ? `${Math.floor(duration / 60)}:${String(Math.floor(duration % 60)).padStart(2, '0')}` : '00:00'}</span>
+                              </div>
+                              {currentTrack.audioUrl ? (
+                                <>
+                                  <div className="mb-2 text-[11px] text-gray-300">
+                                    Direct stream ready for this track.
+                                  </div>
+                                  <audio
+                                    ref={audioRef}
+                                    key={currentTrack.id}
+                                    src={currentTrack.audioUrl}
+                                    preload="metadata"
+                                    onLoadedMetadata={handleMetadataLoaded}
+                                    onTimeUpdate={handleTimeUpdate}
+                                    onPause={() => setIsPlaying(false)}
+                                    onPlay={() => setIsPlaying(true)}
+                                    onEnded={() => {
+                                      setIsPlaying(false);
+                                      setCurrentTime(0);
+                                      stopVisualizer();
+                                    }}
+                                  />
+                                </>
+                              ) : (
+                                <div className="flex h-full items-center justify-center text-center text-gray-400">
+                                  <div>
+                                    <div className="font-bold text-white">Direct audio source needed</div>
+                                    <div className="mt-1">The native player is ready; add a direct MP3/M4A stream URL to enable playback.</div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="mt-2 flex items-center justify-between text-[10px] text-gray-600">
+                              <span>Audio source • HTML5</span>
+                              <a
+                                href={`https://soundcloud.com/uloee/${TRACK_SLUG_MAP[currentTrack.id]}`}
+                                className="font-bold text-blue-900 underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Open track
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex gap-2 justify-end">
+                          <a href="https://soundcloud.com/uloee" target="_blank" rel="noopener noreferrer" className="win2k-btn bg-orange-100 font-bold border-orange-500">
+                            SoundCloud Profile
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Visuals File Explorer */}
+                  {win.id === 'gallery' && (
+                    <div>
+                      <div className="bg-gray-100 p-2 mb-3 border flex items-center justify-between text-[11px]">
+                        <div>Address: <span className="bg-white px-2 py-0.5 border font-mono">C:\Visuals_and_Edits</span></div>
+                        <div className="text-gray-500">6 Object(s)</div>
+                      </div>
+
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 p-2">
+                        {GALLERY_ITEMS.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex flex-col items-center justify-center p-2 text-center hover:bg-blue-900/10 cursor-pointer border border-transparent hover:border-blue-950/20 rounded"
+                            onDoubleClick={() => openImageViewer(item)}
+                          >
+                            <ImageFileIcon />
+                            <div className="text-[11px] truncate w-full mt-1.5">{item.name}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Internet Explorer */}
+                  {win.id === 'links' && (
+                    <div className="flex flex-col h-full bg-[#f1f1f1]">
+                      {/* IE top panel */}
+                      <div className="bg-[#d0d0c8] p-2 border-b flex flex-col gap-1.5">
+                        <div className="flex gap-2">
+                          <button className="win2k-btn px-1.5 py-0.5 text-[10px]" onClick={() => alert("Back navigation simulation")}>&lt; Back</button>
+                          <button className="win2k-btn px-1.5 py-0.5 text-[10px]" onClick={() => alert("Forward navigation simulation")}>Forward &gt;</button>
+                          <div className="flex-1 flex items-center gap-1">
+                            <span className="text-[11px] font-sans">Address:</span>
+                            <div className="flex-1 bg-white border border-gray-400 font-mono text-[11px] px-2 py-0.5">
+                              http://www.chromeheaven.com/links
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Simulated web content */}
+                      <div className="flex-1 bg-[#2b4c7e] p-6 overflow-y-auto text-white font-sans text-center">
+                        <div className="max-w-md mx-auto bg-[#d0d0c8] border-2 border-white border-r-[#404040] border-bottom-[#404040] p-4 text-black text-left shadow-lg">
+                          <div className="bg-gradient-to-r from-blue-900 to-blue-400 text-white font-bold p-1 text-[11px] mb-3">
+                            Internet Explorer Web Portal
+                          </div>
+                          
+                          <div className="flex items-center gap-4 mb-4 border-b pb-3">
+                            <Image
+                              src="/images/avatar.png"
+                              alt="Uloe avatar"
+                              width={48}
+                              height={48}
+                              className="rounded-full border"
+                            />
+                            <div>
+                              <h2 className="font-display font-bold text-base leading-tight">Chrome Heaven Portal</h2>
+                              <p className="text-xs text-gray-500 font-jp">影が届くまで</p>
+                            </div>
+                          </div>
+
+                          <p className="text-[11px] mb-4 text-gray-700">
+                            Click any destination below to access official profiles and streaming:
+                          </p>
+
+                          <div className="flex flex-col gap-2">
+                            <a
+                              href="https://soundcloud.com/uloee"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block p-2 bg-orange-100 hover:bg-orange-200 border-2 border-white border-r-orange-600 border-b-orange-600 text-orange-950 font-bold text-center text-xs"
+                            >
+                              SoundCloud Profile (uloee)
+                            </a>
+                            <a
+                              href="https://bandcamp.com"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block p-2 bg-teal-100 hover:bg-teal-200 border-2 border-white border-r-teal-600 border-b-teal-600 text-teal-950 font-bold text-center text-xs"
+                            >
+                              Bandcamp
+                            </a>
+                            <a
+                              href="https://instagram.com"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block p-2 bg-pink-100 hover:bg-pink-200 border-2 border-white border-r-pink-600 border-b-pink-600 text-pink-950 font-bold text-center text-xs"
+                            >
+                              Instagram
+                            </a>
+                            <a
+                              href="https://chromeheaven.tumblr.com"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block p-2 bg-blue-100 hover:bg-blue-200 border-2 border-white border-r-blue-600 border-b-blue-600 text-blue-950 font-bold text-center text-xs"
+                            >
+                              Tumblr Blog
+                            </a>
+                            <a
+                              href="https://youtube.com"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block p-2 bg-red-100 hover:bg-red-200 border-2 border-white border-r-red-600 border-b-red-600 text-red-950 font-bold text-center text-xs"
+                            >
+                              YouTube
+                            </a>
+                            <a
+                              href="https://tiktok.com"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block p-2 bg-violet-100 hover:bg-violet-200 border-2 border-white border-r-violet-600 border-b-violet-600 text-violet-950 font-bold text-center text-xs"
+                            >
+                              TikTok
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Display properties / Wallpaper setup */}
+                  {win.id === 'settings' && (
+                    <div className="flex flex-col gap-4">
+                      <div className="font-bold text-blue-900 border-b pb-1">Wallpaper Configuration</div>
+                      <p className="text-[11px] text-gray-600">Select a classic wallpaper to customize your desktop background:</p>
+                      
+                      <div className="flex flex-col gap-2">
+                        {WALLPAPERS.map((wp) => (
+                          <div
+                            key={wp.id}
+                            className={`p-2 border cursor-pointer flex justify-between items-center text-[12px] ${
+                              currentWallpaper.id === wp.id ? 'bg-[#000080] text-white' : 'hover:bg-gray-100'
+                            }`}
+                            onClick={() => setCurrentWallpaper(wp)}
+                          >
+                            <span>{wp.name}</span>
+                            <span className="text-[10px] opacity-75 uppercase">{wp.type}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="text-right mt-4">
+                        <button className="win2k-btn" onClick={() => closeWindow('settings')}>
+                          Apply Changes
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Image Viewer */}
+                  {win.id === 'viewer' && selectedImage && (
+                    <div className="flex flex-col items-center justify-between h-full bg-[#f1f1f1] p-2">
+                      <div className="relative w-full flex-1 min-h-[300px] border border-gray-400 bg-black flex items-center justify-center">
+                        <Image
+                          src={selectedImage.src}
+                          alt={selectedImage.name}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          className="object-contain"
+                        />
+                      </div>
+                      <div className="w-full text-center mt-2 font-mono text-[11px] text-gray-700">
+                        {selectedImage.name} - #{selectedImage.tag}
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+                
+                {/* Classic status bar */}
+                <div className="win2k-status-bar select-none">
+                  <div className="win2k-status-field">Status: Active</div>
+                  <div className="win2k-status-field">Canary Islands</div>
+                  <div className="win2k-status-field font-mono text-right">CH95</div>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Taskbar Area (Windows 95 high fidelity styling) */}
+      <div className="win95-taskbar select-none">
+        
+        {/* Start Button & Active Task tabs */}
+        <div className="flex items-center gap-2 h-full">
+          <button
+            id="start-button"
+            className={`start-btn ${startMenuOpen ? 'pressed' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setStartMenuOpen(!startMenuOpen);
+            }}
+          >
+            <Win95Logo />
+            <span>Start</span>
+          </button>
+
+          {/* Separator line */}
+          <div className="w-0.5 h-[28px] bg-white border-l border-gray-500 mx-1"></div>
+
+          {/* Active task windows list */}
+          <div className="flex gap-1 h-full items-center">
+            {windows.map((win) => {
+              if (!win.isOpen) return null;
+              const isActive = activeWindowId === win.id && !win.isMinimized;
+              return (
+                <button
+                  key={win.id}
+                  className={`taskbar-tab ${isActive ? 'active' : ''}`}
+                  onClick={() => {
+                    if (win.isMinimized) {
+                      setWindows(prev => prev.map(w => w.id === win.id ? { ...w, isMinimized: false } : w));
+                      setActiveWindowId(win.id);
+                    } else if (activeWindowId === win.id) {
+                      minimizeWindow(win.id);
+                    } else {
+                      setActiveWindowId(win.id);
+                    }
+                  }}
+                >
+                  <div className="w-4 h-4 scale-75 flex-shrink-0 flex items-center justify-center">
+                    {win.icon}
+                  </div>
+                  <span className="truncate pr-1 text-[11px]">{win.title.split(' - ')[0]}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Start Menu Popup */}
+        <AnimatePresence>
+          {startMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 15 }}
+              transition={{ duration: 0.15 }}
+              className="absolute bottom-9 left-1 w-52 bg-[#d0d0c8] border-2 border-white border-r-[#404040] border-b-[#404040] z-50 p-0.5 flex"
+            >
+              {/* Start menu side bar */}
+              <div className="w-8 bg-gradient-to-t from-blue-900 to-blue-500 flex items-end justify-center py-2 select-none">
+                <span className="text-white font-bold font-display text-[12px] origin-center -rotate-90 tracking-widest uppercase">
+                  Win95
+                </span>
+              </div>
+
+              {/* Start menu list */}
+              <div className="flex-1 flex flex-col py-1 text-[11px] select-none text-black">
+                <div className="px-3 py-1.5 hover:bg-[#000080] hover:text-white cursor-default flex items-center gap-2" onClick={() => openWindow('welcome')}>
+                  <TextDocIcon />
+                  <span>Welcome.txt</span>
+                </div>
+                <div className="px-3 py-1.5 hover:bg-[#000080] hover:text-white cursor-default flex items-center gap-2" onClick={() => openWindow('music')}>
+                  <MediaPlayerIcon />
+                  <span>Windows Media Player</span>
+                </div>
+                <div className="px-3 py-1.5 hover:bg-[#000080] hover:text-white cursor-default flex items-center gap-2" onClick={() => openWindow('gallery')}>
+                  <FolderIcon />
+                  <span>C:\Visuals_and_Edits</span>
+                </div>
+                <div className="px-3 py-1.5 hover:bg-[#000080] hover:text-white cursor-default flex items-center gap-2" onClick={() => openWindow('links')}>
+                  <IEIcon />
+                  <span>Internet Explorer</span>
+                </div>
+                <div className="px-3 py-1.5 hover:bg-[#000080] hover:text-white cursor-default flex items-center gap-2" onClick={() => openWindow('settings')}>
+                  <MyComputerIcon />
+                  <span>Display Settings</span>
+                </div>
+                <div className="border-t border-gray-400 my-1"></div>
+                <div className="px-3 py-1.5 hover:bg-[#000080] hover:text-white cursor-default flex items-center gap-2" onClick={() => alert("Shut Down simulation: Goodbye!")}>
+                  <svg className="w-4 h-4 scale-75" viewBox="0 0 16 16" fill="none">
+                    <circle cx="8" cy="8" r="6" stroke="#000" strokeWidth="1.5" />
+                    <line x1="8" y1="2" x2="8" y2="8" stroke="#000" strokeWidth="1.5" />
+                  </svg>
+                  <span>Shut Down...</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* System Tray (Clock & status indicators) */}
+        <div className="win95-tray">
+          <NetworkIcon />
+          <VolumeIcon />
+          <div className="w-px h-3.5 bg-gray-400 border-r border-white"></div>
+          <span className="font-medium text-black text-[11px]">{time}</span>
+        </div>
+
+      </div>
+    </div>
+  );
+}
