@@ -156,6 +156,14 @@ const TRACK_SLUG_MAP: { [key: string]: string } = {
 
 const TRACKS: Track[] = [
   {
+    id: 'nevermind_190bpm_uloe',
+    title: 'nevermind 190bpm',
+    artist: 'Chrome Heaven',
+    genre: 'Local WAV / 190 BPM',
+    soundcloudEmbedUrl: buildSoundCloudEmbedUrl('malice'),
+    audioUrl: '/audio/nevermind_190bpm_uloe.wav',
+  },
+  {
     id: 'malice',
     title: 'ｍａｌｉｃｅ [EP]',
     artist: 'Chrome Heaven',
@@ -762,12 +770,12 @@ export default function Home() {
                             <div className="mt-2 flex items-center justify-between text-[10px] text-gray-600">
                               <span>Audio source • HTML5</span>
                               <a
-                                href={`https://soundcloud.com/uloee/${TRACK_SLUG_MAP[currentTrack.id]}`}
+                                href={currentTrack.audioUrl ?? `https://soundcloud.com/uloee/${TRACK_SLUG_MAP[currentTrack.id]}`}
                                 className="font-bold text-blue-900 underline"
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
-                                Open track
+                                {currentTrack.audioUrl ? 'Open local file' : 'Open track'}
                               </a>
                             </div>
                           </div>
