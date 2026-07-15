@@ -41,6 +41,7 @@ export async function POST(request: Request) {
       const artist = formData.get('artist') as string;
       const genre = formData.get('genre') as string;
       const file = formData.get('file') as File;
+      const coverFile = formData.get('cover') as File | null;
 
       if (!file || !title) {
         return NextResponse.json({ success: false, message: 'Missing file or title' }, { status: 400 });
@@ -60,12 +61,25 @@ export async function POST(request: Request) {
       const audioUrl = `/audio/${cleanFilename}`;
       const id = cleanFilename.split('.')[0].toLowerCase() + '_' + Date.now();
 
+      // Handle optional cover art
+      let coverUrl: string | undefined;
+      if (coverFile && coverFile.size > 0) {
+        const coverDir = path.join(process.cwd(), 'public', 'images', 'covers');
+        await fs.mkdir(coverDir, { recursive: true });
+        const cleanCoverFilename = coverFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const coverPath = path.join(coverDir, cleanCoverFilename);
+        const coverBuffer = Buffer.from(await coverFile.arrayBuffer());
+        await fs.writeFile(coverPath, coverBuffer);
+        coverUrl = `/images/covers/${cleanCoverFilename}`;
+      }
+
       const newTrack = {
         id,
         title,
         artist: artist || 'Chrome Heaven',
         genre: genre || 'Electronic',
-        audioUrl
+        audioUrl,
+        ...(coverUrl ? { coverUrl } : {})
       };
 
       dbContent.tracks.push(newTrack);
@@ -77,31 +91,36 @@ export async function POST(request: Request) {
     else if (action === 'upload_image') {
       const name = formData.get('name') as string;
       const tag = formData.get('tag') as string;
+      const description = formData.get('description') as string;
+      const type = (formData.get('type') as string) || 'image';
       const file = formData.get('file') as File;
 
       if (!file || !name) {
         return NextResponse.json({ success: false, message: 'Missing file or name' }, { status: 400 });
       }
 
-      // Generate clean filename
+      // Determine upload directory by type
       const cleanFilename = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const uploadDir = path.join(process.cwd(), 'public', 'images');
+      const uploadDir = type === 'video'
+        ? path.join(process.cwd(), 'public', 'videos')
+        : path.join(process.cwd(), 'public', 'images');
       
-      // Ensure directory exists
       await fs.mkdir(uploadDir, { recursive: true });
 
       const filePath = path.join(uploadDir, cleanFilename);
       const buffer = Buffer.from(await file.arrayBuffer());
       await fs.writeFile(filePath, buffer);
 
-      const src = `/images/${cleanFilename}`;
+      const src = type === 'video' ? `/videos/${cleanFilename}` : `/images/${cleanFilename}`;
       const id = 'g_' + cleanFilename.split('.')[0].toLowerCase() + '_' + Date.now();
 
       const newImage = {
         id,
-        name: name.endsWith('.bmp') || name.endsWith('.png') || name.endsWith('.jpg') ? name : `${name}.bmp`,
+        name,
         src,
-        tag: tag || 'visual'
+        tag: tag || 'visual',
+        type: type as 'image' | 'video' | 'gif',
+        ...(description ? { description } : {})
       };
 
       dbContent.gallery.push(newImage);

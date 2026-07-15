@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 
 const AdminIcon = () => (
   <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -31,6 +30,7 @@ interface Track {
   artist: string;
   genre: string;
   audioUrl?: string;
+  coverUrl?: string;
 }
 
 interface GalleryItem {
@@ -38,6 +38,8 @@ interface GalleryItem {
   name: string;
   src: string;
   tag: string;
+  type?: 'image' | 'video' | 'gif';
+  description?: string;
 }
 
 interface BlogPost {
@@ -49,10 +51,23 @@ interface BlogPost {
   audioSrc?: string;
 }
 
+const WALLPAPERS = [
+  { id: 'classic_teal', name: 'Classic Teal', value: '#386ca0', type: 'color' },
+  { id: 'deep_violet', name: 'Deep Violet', value: '#120c1f', type: 'color' },
+  { id: 'midnight', name: 'Midnight Black', value: '#0a0a0f', type: 'color' },
+  { id: 'forest', name: 'Dark Forest', value: '#0d1f0d', type: 'color' },
+  { id: 'wine', name: 'Wine Red', value: '#1f0a0a', type: 'color' },
+  { id: 'fence', name: 'Fence Tile', value: 'url("https://sadhost.neocities.org/images/tiles/fence.gif")', type: 'tile' },
+  { id: 'clouds', name: 'Heavenly Clouds', value: 'url("https://win98icons.alexmeub.com/images/wallpapers/clouds.png")', type: 'cover' },
+];
+
 export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isLoggedOn, setIsLoggedOn] = useState(false);
-  const [activeTab, setActiveTab] = useState<'music' | 'visuals' | 'blog'>('music');
+  const [activeTab, setActiveTab] = useState<'music' | 'visuals' | 'blog' | 'settings'>('music');
+
+  // Wallpaper state (persists via localStorage)
+  const [wallpaper, setWallpaper] = useState(WALLPAPERS[0]);
 
   // Database loaded states
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -64,13 +79,17 @@ export default function AdminPage() {
   const [uploadTrackArtist, setUploadTrackArtist] = useState('Chrome Heaven');
   const [uploadTrackGenre, setUploadTrackGenre] = useState('Electronic');
   const [uploadTrackFile, setUploadTrackFile] = useState<File | null>(null);
+  const [uploadTrackCoverFile, setUploadTrackCoverFile] = useState<File | null>(null);
+  const [uploadTrackCoverPreview, setUploadTrackCoverPreview] = useState<string | null>(null);
   const [uploadTrackStatus, setUploadTrackStatus] = useState({ type: '', text: '' });
 
   // Visuals upload state
-  const [uploadImageName, setUploadImageName] = useState('');
-  const [uploadImageTag, setUploadImageTag] = useState('');
-  const [uploadImageFile, setUploadImageFile] = useState<File | null>(null);
-  const [uploadImageStatus, setUploadImageStatus] = useState({ type: '', text: '' });
+  const [uploadMediaName, setUploadMediaName] = useState('');
+  const [uploadMediaTag, setUploadMediaTag] = useState('');
+  const [uploadMediaDescription, setUploadMediaDescription] = useState('');
+  const [uploadMediaType, setUploadMediaType] = useState<'image' | 'video' | 'gif'>('image');
+  const [uploadMediaFile, setUploadMediaFile] = useState<File | null>(null);
+  const [uploadMediaStatus, setUploadMediaStatus] = useState({ type: '', text: '' });
 
   // Blog upload state
   const [newPostTitle, setNewPostTitle] = useState('');
@@ -79,6 +98,15 @@ export default function AdminPage() {
   const [newPostAttachedImage, setNewPostAttachedImage] = useState('');
   const [newPostAttachedAudio, setNewPostAttachedAudio] = useState('');
   const [newPostStatus, setNewPostStatus] = useState({ type: '', text: '' });
+
+  // Load wallpaper preference from localStorage
+  useEffect(() => {
+    const savedWallpaperId = localStorage.getItem('admin_wallpaper');
+    if (savedWallpaperId) {
+      const found = WALLPAPERS.find(w => w.id === savedWallpaperId);
+      if (found) setWallpaper(found);
+    }
+  }, []);
 
   // Load database metadata to populate selectors
   useEffect(() => {
@@ -92,7 +120,7 @@ export default function AdminPage() {
           if (data.posts) setPosts(data.posts);
         }
       } catch (err) {
-        console.warn('Could not load database in admin page, using fallback empty metadata.', err);
+        console.warn('Could not load database in admin page.', err);
       }
     };
     loadContent();
@@ -113,8 +141,30 @@ export default function AdminPage() {
     }
   };
 
+  const applyWallpaper = (wp: typeof WALLPAPERS[0]) => {
+    setWallpaper(wp);
+    localStorage.setItem('admin_wallpaper', wp.id);
+  };
+
+  // Compute background style
+  const bgStyle: React.CSSProperties = wallpaper.type === 'color'
+    ? { backgroundColor: wallpaper.value }
+    : wallpaper.type === 'tile'
+    ? { backgroundImage: wallpaper.value, backgroundRepeat: 'repeat' }
+    : { backgroundImage: wallpaper.value, backgroundSize: 'cover', backgroundPosition: 'center' };
+
+  // Media accept types helper
+  const mediaAccept = uploadMediaType === 'video' ? 'video/*' : uploadMediaType === 'gif' ? 'image/gif' : 'image/*';
+
+  const TABS: { id: 'music' | 'visuals' | 'blog' | 'settings'; label: string }[] = [
+    { id: 'music', label: 'Music Track' },
+    { id: 'visuals', label: 'Visual / Video' },
+    { id: 'blog', label: 'Diary Post' },
+    { id: 'settings', label: '⚙ Settings' },
+  ];
+
   return (
-    <div className="w-screen h-screen overflow-hidden flex flex-col font-sans select-none" style={{ backgroundColor: '#386ca0' }}>
+    <div className="w-screen h-screen overflow-hidden flex flex-col font-sans select-none" style={bgStyle}>
       
       {!isLoggedOn ? (
         /* Full Screen Windows 95 Logon Dialog */
@@ -172,19 +222,8 @@ export default function AdminPage() {
 
               {/* Buttons on the right */}
               <div className="flex flex-col gap-2 w-20">
-                <button
-                  type="submit"
-                  className="win2k-btn font-bold py-1 w-full text-center"
-                >
-                  OK
-                </button>
-                <button
-                  type="button"
-                  className="win2k-btn py-1 w-full text-center"
-                  onClick={() => window.location.href = '/'}
-                >
-                  Cancel
-                </button>
+                <button type="submit" className="win2k-btn font-bold py-1 w-full text-center">OK</button>
+                <button type="button" className="win2k-btn py-1 w-full text-center" onClick={() => window.location.href = '/'}>Cancel</button>
               </div>
             </div>
             <div className="px-4 pb-2 text-[9px] text-gray-500 font-mono text-center">Hint: Password is &quot;heaven&quot;</div>
@@ -192,10 +231,10 @@ export default function AdminPage() {
         </div>
       ) : (
         /* Logged In Desktop and Uploader Window */
-        <div className="flex-1 relative p-4 flex items-center justify-center">
+        <div className="flex-1 relative p-4 flex items-center justify-center overflow-auto">
           
           {/* Centered Upload Manager Window */}
-          <div className="w-full max-w-[480px] bg-[#d0d0c8] win2k-window flex flex-col">
+          <div className="w-full max-w-[520px] bg-[#d0d0c8] win2k-window flex flex-col">
             
             {/* Title Bar */}
             <div className="win2k-title-bar">
@@ -208,7 +247,7 @@ export default function AdminPage() {
               <div className="flex gap-1 pl-2">
                 <button 
                   className="win2k-title-btn font-bold text-red-700 font-sans" 
-                  onClick={() => setIsLoggedOn(false)}
+                  onClick={() => { setIsLoggedOn(false); setPassword(''); }}
                   title="Log Off"
                 >
                   X
@@ -220,78 +259,99 @@ export default function AdminPage() {
             <div className="flex-1 bg-white overflow-hidden flex flex-col p-1.5 text-black">
               
               {/* Tab Header bar */}
-              <div className="flex border-b border-gray-400 gap-1 bg-[#d0d0c8] p-1 pb-0 select-none">
-                <button
-                  className={`px-3 py-1 text-[11px] rounded-t-sm border border-b-0 ${
-                    activeTab === 'music'
-                      ? 'bg-[#d0d0c8] border-white border-r-[#404040] font-bold z-10 relative -mb-px'
-                      : 'bg-gray-200 border-gray-300 border-b-gray-400 hover:bg-gray-100'
-                  }`}
-                  onClick={() => setActiveTab('music')}
-                >
-                  Music Track
-                </button>
-                <button
-                  className={`px-3 py-1 text-[11px] rounded-t-sm border border-b-0 ${
-                    activeTab === 'visuals'
-                      ? 'bg-[#d0d0c8] border-white border-r-[#404040] font-bold z-10 relative -mb-px'
-                      : 'bg-gray-200 border-gray-300 border-b-gray-400 hover:bg-gray-100'
-                  }`}
-                  onClick={() => setActiveTab('visuals')}
-                >
-                  Visual Image
-                </button>
-                <button
-                  className={`px-3 py-1 text-[11px] rounded-t-sm border border-b-0 ${
-                    activeTab === 'blog'
-                      ? 'bg-[#d0d0c8] border-white border-r-[#404040] font-bold z-10 relative -mb-px'
-                      : 'bg-gray-200 border-gray-300 border-b-gray-400 hover:bg-gray-100'
-                  }`}
-                  onClick={() => setActiveTab('blog')}
-                >
-                  Diary Post
-                </button>
+              <div className="flex border-b border-gray-400 gap-1 bg-[#d0d0c8] p-1 pb-0 select-none flex-wrap">
+                {TABS.map(tab => (
+                  <button
+                    key={tab.id}
+                    className={`px-3 py-1 text-[11px] rounded-t-sm border border-b-0 ${
+                      activeTab === tab.id
+                        ? 'bg-[#d0d0c8] border-white border-r-[#404040] font-bold z-10 relative -mb-px'
+                        : 'bg-gray-200 border-gray-300 border-b-gray-400 hover:bg-gray-100'
+                    }`}
+                    onClick={() => setActiveTab(tab.id)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
 
               {/* Tab Frame */}
-              <div className="flex-1 bg-[#d0d0c8] win2k-border-inset p-4 flex flex-col gap-3 min-h-[300px]">
+              <div className="flex-1 bg-[#d0d0c8] win2k-border-inset p-4 flex flex-col gap-3 min-h-[360px] overflow-y-auto win2k-scroll">
                 
-                {/* Tab 1: Music Track */}
+                {/* ══════════════════════════════════ */}
+                {/* Tab 1: Music Track                 */}
+                {/* ══════════════════════════════════ */}
                 {activeTab === 'music' && (
                   <div className="flex flex-col gap-3 text-[11px]">
                     <div className="font-bold text-blue-900 border-b pb-1 uppercase tracking-wider">Upload New Music Track</div>
                     
-                    <div className="flex flex-col gap-1">
-                      <label className="font-bold text-gray-700">Track Title:</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. malice_demo"
-                        className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans"
-                        value={uploadTrackTitle}
-                        onChange={(e) => setUploadTrackTitle(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="flex gap-2">
-                      <div className="flex-1 flex flex-col gap-1">
-                        <label className="font-bold text-gray-700">Artist:</label>
-                        <input
-                          type="text"
-                          placeholder="Chrome Heaven"
-                          className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans"
-                          value={uploadTrackArtist}
-                          onChange={(e) => setUploadTrackArtist(e.target.value)}
-                        />
+                    <div className="flex gap-3">
+                      {/* Cover Art Preview */}
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="w-16 h-16 border border-gray-400 bg-black overflow-hidden flex items-center justify-center flex-shrink-0">
+                          {uploadTrackCoverPreview ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={uploadTrackCoverPreview} alt="cover preview" className="w-full h-full object-cover" />
+                          ) : (
+                            <svg viewBox="0 0 24 24" className="w-8 h-8 text-gray-600" fill="currentColor">
+                              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                              <circle cx="12" cy="12" r="4" />
+                              <circle cx="12" cy="12" r="1.5" fill="#000" />
+                            </svg>
+                          )}
+                        </div>
+                        <label className="font-bold text-gray-600 text-[9px] cursor-pointer hover:text-blue-900 text-center leading-tight">
+                          Cover Art<br />(optional)
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files.length > 0) {
+                                const f = e.target.files[0];
+                                setUploadTrackCoverFile(f);
+                                setUploadTrackCoverPreview(URL.createObjectURL(f));
+                              }
+                            }}
+                          />
+                        </label>
                       </div>
-                      <div className="flex-1 flex flex-col gap-1">
-                        <label className="font-bold text-gray-700">Genre/Alias:</label>
-                        <input
-                          type="text"
-                          placeholder="Local WAV / Dreamcore"
-                          className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans"
-                          value={uploadTrackGenre}
-                          onChange={(e) => setUploadTrackGenre(e.target.value)}
-                        />
+
+                      {/* Track fields */}
+                      <div className="flex-1 flex flex-col gap-2">
+                        <div className="flex flex-col gap-1">
+                          <label className="font-bold text-gray-700">Track Title:</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. malice_demo"
+                            className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans"
+                            value={uploadTrackTitle}
+                            onChange={(e) => setUploadTrackTitle(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="flex gap-2">
+                          <div className="flex-1 flex flex-col gap-1">
+                            <label className="font-bold text-gray-700">Artist:</label>
+                            <input
+                              type="text"
+                              placeholder="Chrome Heaven"
+                              className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans"
+                              value={uploadTrackArtist}
+                              onChange={(e) => setUploadTrackArtist(e.target.value)}
+                            />
+                          </div>
+                          <div className="flex-1 flex flex-col gap-1">
+                            <label className="font-bold text-gray-700">Genre:</label>
+                            <input
+                              type="text"
+                              placeholder="Dreamcore"
+                              className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans"
+                              value={uploadTrackGenre}
+                              onChange={(e) => setUploadTrackGenre(e.target.value)}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -323,7 +383,7 @@ export default function AdminPage() {
                         className="win2k-btn font-bold px-4 py-1.5"
                         onClick={async () => {
                           if (!uploadTrackTitle || !uploadTrackFile) {
-                            alert('Please provide a title and select a file.');
+                            alert('Please provide a title and select an audio file.');
                             return;
                           }
                           setUploadTrackStatus({ type: 'loading', text: 'Processing track...' });
@@ -334,40 +394,40 @@ export default function AdminPage() {
                           formData.append('artist', uploadTrackArtist);
                           formData.append('genre', uploadTrackGenre);
                           formData.append('file', uploadTrackFile);
+                          if (uploadTrackCoverFile) {
+                            formData.append('cover', uploadTrackCoverFile);
+                          }
 
                           try {
-                            const res = await fetch('/api/content', {
-                              method: 'POST',
-                              body: formData
-                            });
+                            const res = await fetch('/api/content', { method: 'POST', body: formData });
                             const data = await res.json();
                             if (res.ok && data.success) {
                               setTracks(data.db.tracks);
-                              setUploadTrackStatus({ type: 'success', text: `Track "${uploadTrackTitle}" successfully saved to disk! Registered in WMP.` });
+                              setUploadTrackStatus({ type: 'success', text: `✓ Track "${uploadTrackTitle}" saved to disk and registered in WMP.` });
                               setUploadTrackTitle('');
                               setUploadTrackFile(null);
+                              setUploadTrackCoverFile(null);
+                              setUploadTrackCoverPreview(null);
                             } else {
                               throw new Error(data.message || 'API error');
                             }
                           } catch (err: any) {
-                            console.warn('API error, executing session simulation fallback:', err);
-                            // Fallback simulation in production
+                            // Fallback simulation
                             const fileUrl = URL.createObjectURL(uploadTrackFile);
-                            const simulatedId = 'sim_' + Date.now();
-                            const simulatedTrack = {
-                              id: simulatedId,
+                            const coverUrl = uploadTrackCoverFile ? URL.createObjectURL(uploadTrackCoverFile) : undefined;
+                            setTracks(prev => [...prev, {
+                              id: 'sim_' + Date.now(),
                               title: uploadTrackTitle,
                               artist: uploadTrackArtist,
                               genre: uploadTrackGenre,
-                              audioUrl: fileUrl
-                            };
-                            setTracks(prev => [...prev, simulatedTrack]);
-                            setUploadTrackStatus({ 
-                              type: 'success', 
-                              text: `Session Simulation: Track "${uploadTrackTitle}" registered in WMP. (Preview only; run dev server to write to disk)` 
-                            });
+                              audioUrl: fileUrl,
+                              ...(coverUrl ? { coverUrl } : {})
+                            }]);
+                            setUploadTrackStatus({ type: 'success', text: `Session Simulation: "${uploadTrackTitle}" registered. (Preview only — run dev server to save to disk)` });
                             setUploadTrackTitle('');
                             setUploadTrackFile(null);
+                            setUploadTrackCoverFile(null);
+                            setUploadTrackCoverPreview(null);
                           }
                         }}
                       >
@@ -377,116 +437,152 @@ export default function AdminPage() {
                   </div>
                 )}
 
-                {/* Tab 2: Visual Image */}
+                {/* ══════════════════════════════════ */}
+                {/* Tab 2: Visual / Video              */}
+                {/* ══════════════════════════════════ */}
                 {activeTab === 'visuals' && (
                   <div className="flex flex-col gap-3 text-[11px]">
-                    <div className="font-bold text-blue-900 border-b pb-1 uppercase tracking-wider">Upload New Visual Image</div>
+                    <div className="font-bold text-blue-900 border-b pb-1 uppercase tracking-wider">Upload Visual, GIF or Video</div>
                     
+                    {/* Type selector */}
                     <div className="flex flex-col gap-1">
-                      <label className="font-bold text-gray-700">Display Name:</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. blue_dreams.bmp"
-                        className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans"
-                        value={uploadImageName}
-                        onChange={(e) => setUploadImageName(e.target.value)}
+                      <label className="font-bold text-gray-700">File Type:</label>
+                      <div className="flex gap-2">
+                        {(['image', 'gif', 'video'] as const).map(t => (
+                          <label key={t} className="flex items-center gap-1 cursor-pointer capitalize">
+                            <input
+                              type="radio"
+                              name="mediaType"
+                              value={t}
+                              checked={uploadMediaType === t}
+                              onChange={() => { setUploadMediaType(t); setUploadMediaFile(null); }}
+                            />
+                            {t === 'image' ? 'Image (.png, .jpg)' : t === 'gif' ? 'Animation (.gif)' : 'Video (.mp4, .webm)'}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <div className="flex-1 flex flex-col gap-1">
+                        <label className="font-bold text-gray-700">Display Name:</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. blue_dreams.gif"
+                          className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans"
+                          value={uploadMediaName}
+                          onChange={(e) => setUploadMediaName(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex-1 flex flex-col gap-1">
+                        <label className="font-bold text-gray-700">Tag / Theme:</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Tenerife2026"
+                          className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans"
+                          value={uploadMediaTag}
+                          onChange={(e) => setUploadMediaTag(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="font-bold text-gray-700">Description (optional):</label>
+                      <textarea
+                        placeholder="Brief description of this visual..."
+                        className="p-2 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans resize-none h-[52px]"
+                        value={uploadMediaDescription}
+                        onChange={(e) => setUploadMediaDescription(e.target.value)}
                       />
                     </div>
 
                     <div className="flex flex-col gap-1">
-                      <label className="font-bold text-gray-700">Tag / Theme:</label>
+                      <label className="font-bold text-gray-700">
+                        {uploadMediaType === 'video' ? 'Video File (.mp4, .webm):' : uploadMediaType === 'gif' ? 'GIF File (.gif):' : 'Image File (.png, .jpg, .bmp):'}
+                      </label>
                       <input
-                        type="text"
-                        placeholder="e.g. Tenerife2026"
-                        className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans"
-                        value={uploadImageTag}
-                        onChange={(e) => setUploadImageTag(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <label className="font-bold text-gray-700">Image File (PNG, JPG, BMP):</label>
-                      <input
+                        key={uploadMediaType}
                         type="file"
-                        accept="image/*"
+                        accept={mediaAccept}
                         className="w-full text-xs"
                         onChange={(e) => {
                           if (e.target.files && e.target.files.length > 0) {
-                            setUploadImageFile(e.target.files[0]);
+                            setUploadMediaFile(e.target.files[0]);
                           }
                         }}
                       />
                     </div>
 
-                    {uploadImageStatus.text && (
+                    {uploadMediaStatus.text && (
                       <div className={`p-2 border font-mono text-[10px] ${
-                        uploadImageStatus.type === 'success' ? 'bg-green-100 border-green-500 text-green-900' : 'bg-orange-100 border-orange-500 text-orange-950'
+                        uploadMediaStatus.type === 'success' ? 'bg-green-100 border-green-500 text-green-900' : 'bg-orange-100 border-orange-500 text-orange-950'
                       }`}>
-                        {uploadImageStatus.text}
+                        {uploadMediaStatus.text}
                       </div>
                     )}
 
                     <div className="mt-auto flex justify-between items-center pt-2">
-                      <span className="text-[10px] text-gray-500 italic">Self-host images locally</span>
+                      <span className="text-[10px] text-gray-500 italic">Self-host media locally</span>
                       <button
                         className="win2k-btn font-bold px-4 py-1.5"
                         onClick={async () => {
-                          if (!uploadImageName || !uploadImageFile) {
-                            alert('Please provide a name and select an image file.');
+                          if (!uploadMediaName || !uploadMediaFile) {
+                            alert('Please provide a name and select a file.');
                             return;
                           }
-                          setUploadImageStatus({ type: 'loading', text: 'Processing image...' });
+                          setUploadMediaStatus({ type: 'loading', text: 'Processing...' });
 
                           const formData = new FormData();
                           formData.append('action', 'upload_image');
-                          formData.append('name', uploadImageName);
-                          formData.append('tag', uploadImageTag);
-                          formData.append('file', uploadImageFile);
+                          formData.append('name', uploadMediaName);
+                          formData.append('tag', uploadMediaTag);
+                          formData.append('description', uploadMediaDescription);
+                          formData.append('type', uploadMediaType);
+                          formData.append('file', uploadMediaFile);
 
                           try {
-                            const res = await fetch('/api/content', {
-                              method: 'POST',
-                              body: formData
-                            });
+                            const res = await fetch('/api/content', { method: 'POST', body: formData });
                             const data = await res.json();
                             if (res.ok && data.success) {
                               setGalleryItems(data.db.gallery);
-                              setUploadImageStatus({ type: 'success', text: `Image "${uploadImageName}" successfully saved to disk! Registered in Visuals Folder.` });
-                              setUploadImageName('');
-                              setUploadImageFile(null);
+                              setUploadMediaStatus({ type: 'success', text: `✓ "${uploadMediaName}" saved to disk and registered in Visuals folder.` });
+                              setUploadMediaName('');
+                              setUploadMediaTag('');
+                              setUploadMediaDescription('');
+                              setUploadMediaFile(null);
                             } else {
                               throw new Error(data.message || 'API error');
                             }
                           } catch (err: any) {
-                            console.warn('API error, executing session simulation fallback:', err);
-                            // Fallback simulation in production
-                            const fileUrl = URL.createObjectURL(uploadImageFile);
-                            const simulatedId = 'sim_' + Date.now();
-                            const simulatedImage = {
-                              id: simulatedId,
-                              name: uploadImageName.endsWith('.bmp') || uploadImageName.endsWith('.png') || uploadImageName.endsWith('.jpg') ? uploadImageName : `${uploadImageName}.bmp`,
+                            // Fallback simulation
+                            const fileUrl = URL.createObjectURL(uploadMediaFile);
+                            setGalleryItems(prev => [...prev, {
+                              id: 'sim_' + Date.now(),
+                              name: uploadMediaName,
                               src: fileUrl,
-                              tag: uploadImageTag || 'visual'
-                            };
-                            setGalleryItems(prev => [...prev, simulatedImage]);
-                            setUploadImageStatus({ 
-                              type: 'success', 
-                              text: `Session Simulation: Image registered in Visuals Folder. (Preview only; run dev server to write to disk)` 
-                            });
-                            setUploadImageName('');
-                            setUploadImageFile(null);
+                              tag: uploadMediaTag || 'visual',
+                              type: uploadMediaType,
+                              ...(uploadMediaDescription ? { description: uploadMediaDescription } : {})
+                            }]);
+                            setUploadMediaStatus({ type: 'success', text: `Session Simulation: "${uploadMediaName}" registered. (Preview only — run dev server to save to disk)` });
+                            setUploadMediaName('');
+                            setUploadMediaTag('');
+                            setUploadMediaDescription('');
+                            setUploadMediaFile(null);
                           }
                         }}
                       >
-                        Upload Image
+                        Upload
                       </button>
                     </div>
                   </div>
                 )}
 
-                {/* Tab 3: Diary Post */}
+                {/* ══════════════════════════════════ */}
+                {/* Tab 3: Diary Post                  */}
+                {/* ══════════════════════════════════ */}
                 {activeTab === 'blog' && (
-                  <div className="flex flex-col gap-3 text-[11px] h-full flex-1">
+                  <div className="flex flex-col gap-3 text-[11px] flex-1">
                     <div className="font-bold text-blue-900 border-b pb-1 uppercase tracking-wider">Publish New Diary Post</div>
                     
                     <div className="flex gap-2">
@@ -515,7 +611,7 @@ export default function AdminPage() {
                       <label className="font-bold text-gray-700">Entry Content:</label>
                       <textarea
                         placeholder="Write your entry text here..."
-                        className="flex-1 p-2 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans resize-none win2k-scroll"
+                        className="flex-1 p-2 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans resize-none win2k-scroll min-h-[100px]"
                         value={newPostContent}
                         onChange={(e) => setNewPostContent(e.target.value)}
                       />
@@ -561,10 +657,7 @@ export default function AdminPage() {
                     <div className="flex justify-between items-center pt-1 mt-auto">
                       <button
                         className="win2k-btn bg-red-100 border-red-400 text-red-950 font-bold px-3 py-1"
-                        onClick={() => {
-                          setIsLoggedOn(false);
-                          setPassword('');
-                        }}
+                        onClick={() => { setIsLoggedOn(false); setPassword(''); }}
                       >
                         Log Off
                       </button>
@@ -586,14 +679,11 @@ export default function AdminPage() {
                           formData.append('audioSrc', newPostAttachedAudio);
 
                           try {
-                            const res = await fetch('/api/content', {
-                              method: 'POST',
-                              body: formData
-                            });
+                            const res = await fetch('/api/content', { method: 'POST', body: formData });
                             const data = await res.json();
                             if (res.ok && data.success) {
                               setPosts(data.db.posts);
-                              setNewPostStatus({ type: 'success', text: `Post "${newPostTitle}" published successfully to disk!` });
+                              setNewPostStatus({ type: 'success', text: `✓ Post "${newPostTitle}" published to disk!` });
                               setNewPostTitle('');
                               setNewPostContent('');
                               setNewPostAttachedImage('');
@@ -602,22 +692,9 @@ export default function AdminPage() {
                               throw new Error(data.message || 'API error');
                             }
                           } catch (err: any) {
-                            console.warn('API error, executing session simulation fallback:', err);
-                            // Fallback simulation in production
                             const simulatedId = 'sim_p_' + Date.now();
-                            const simulatedPost = {
-                              id: simulatedId,
-                              title: newPostTitle,
-                              date: newPostDate || new Date().toISOString().split('T')[0],
-                              content: newPostContent,
-                              imageSrc: newPostAttachedImage,
-                              audioSrc: newPostAttachedAudio
-                            };
-                            setPosts(prev => [simulatedPost, ...prev]);
-                            setNewPostStatus({ 
-                              type: 'success', 
-                              text: `Session Simulation: Diary post added. (Preview only; run dev server to write to disk)` 
-                            });
+                            setPosts(prev => [{ id: simulatedId, title: newPostTitle, date: newPostDate || new Date().toISOString().split('T')[0], content: newPostContent, imageSrc: newPostAttachedImage, audioSrc: newPostAttachedAudio }, ...prev]);
+                            setNewPostStatus({ type: 'success', text: `Session Simulation: Post added. (Preview only — run dev server to save to disk)` });
                             setNewPostTitle('');
                             setNewPostContent('');
                             setNewPostAttachedImage('');
@@ -631,13 +708,63 @@ export default function AdminPage() {
                   </div>
                 )}
 
+                {/* ══════════════════════════════════ */}
+                {/* Tab 4: Settings (Wallpaper)        */}
+                {/* ══════════════════════════════════ */}
+                {activeTab === 'settings' && (
+                  <div className="flex flex-col gap-3 text-[11px]">
+                    <div className="font-bold text-blue-900 border-b pb-1 uppercase tracking-wider">Display Settings — Admin Desktop</div>
+                    
+                    <p className="text-[10px] text-gray-600 italic">Select a background for the admin desktop. Your choice will be saved automatically in this browser.</p>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      {WALLPAPERS.map(wp => {
+                        const isSelected = wallpaper.id === wp.id;
+                        return (
+                          <button
+                            key={wp.id}
+                            className={`flex items-center gap-2 p-2 border-2 text-left text-[11px] ${
+                              isSelected
+                                ? 'border-blue-900 bg-blue-50 font-bold'
+                                : 'border-gray-300 bg-white hover:bg-gray-50'
+                            }`}
+                            onClick={() => applyWallpaper(wp)}
+                          >
+                            {/* Swatch */}
+                            <div
+                              className="w-8 h-8 flex-shrink-0 border border-gray-400"
+                              style={
+                                wp.type === 'color'
+                                  ? { backgroundColor: wp.value }
+                                  : wp.type === 'tile'
+                                  ? { backgroundImage: wp.value, backgroundRepeat: 'repeat', backgroundSize: '16px' }
+                                  : { backgroundImage: wp.value, backgroundSize: 'cover', backgroundPosition: 'center' }
+                              }
+                            />
+                            <span>{wp.name}</span>
+                            {isSelected && <span className="ml-auto text-blue-900">✓</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mt-2 text-[10px] text-gray-500 border-t pt-2">
+                      <div className="font-bold mb-1">Current wallpaper:</div>
+                      <div
+                        className="h-12 border border-gray-400"
+                        style={bgStyle}
+                      />
+                    </div>
+                  </div>
+                )}
+
               </div>
             </div>
 
             {/* Taskbar indicator inside window frame */}
             <div className="win2k-status-bar select-none">
               <div className="win2k-status-field">Admin Session: Active</div>
-              <div className="win2k-status-field">Localhost</div>
+              <div className="win2k-status-field">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</div>
             </div>
 
           </div>

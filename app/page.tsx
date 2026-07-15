@@ -109,6 +109,31 @@ const ImageFileIcon = () => (
   </svg>
 );
 
+const VideoFileIcon = () => (
+  <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="5" width="26" height="22" rx="1" fill="#1a1a2e" stroke="#000" strokeWidth="1" />
+    <rect x="5" y="7" width="22" height="14" fill="#0d0d1a" />
+    {/* Play button */}
+    <path d="M13 11 L21 14 L13 17 Z" fill="#4080ff" />
+    {/* Film strip holes */}
+    <rect x="5" y="22" width="3" height="3" fill="#303050" />
+    <rect x="10" y="22" width="3" height="3" fill="#303050" />
+    <rect x="15" y="22" width="3" height="3" fill="#303050" />
+    <rect x="20" y="22" width="3" height="3" fill="#303050" />
+    <rect x="25" y="22" width="2" height="3" fill="#303050" />
+  </svg>
+);
+
+const GifFileIcon = () => (
+  <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="4" width="22" height="24" fill="#ffffff" stroke="#000" strokeWidth="1" />
+    <path d="M5 4 L27 4 L27 10 L5 10 Z" fill="#9900cc" />
+    <text x="7" y="9.5" fontSize="6" fontWeight="bold" fill="#ffffff" fontFamily="monospace">GIF</text>
+    <circle cx="16" cy="20" r="5" fill="none" stroke="#9900cc" strokeWidth="1.5" />
+    <path d="M14 20 L19 20 M16 18 L16 22" stroke="#9900cc" strokeWidth="1.5" />
+  </svg>
+);
+
 // Start Menu Flag Logo (Windows 95 style)
 const Win95Logo = () => (
   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -178,6 +203,7 @@ interface Track {
   genre: string;
   soundcloudEmbedUrl?: string;
   audioUrl?: string;
+  coverUrl?: string;
   spotifyUrl?: string;
   bandcampUrl?: string;
 }
@@ -227,6 +253,8 @@ interface GalleryItem {
   name: string;
   src: string;
   tag: string;
+  type?: 'image' | 'video' | 'gif';
+  description?: string;
 }
 
 const DEFAULT_GALLERY_ITEMS: GalleryItem[] = [
@@ -822,10 +850,26 @@ export default function Home() {
                       <div className="flex-1 flex flex-col justify-between">
                         <div className="win2k-border-inset p-2 bg-[#f1f1f1] overflow-hidden h-[320px]">
                           <div className="flex h-full flex-col">
-                            <div className="mb-2 border-b border-gray-300 pb-2">
-                              <div className="text-[10px] uppercase tracking-[0.2em] text-gray-600">Now playing</div>
-                              <div className="text-[12px] font-bold text-blue-900">{currentTrack.title}</div>
-                              <div className="text-[11px] text-gray-700">{currentTrack.artist} · {currentTrack.genre}</div>
+                            <div className="mb-2 border-b border-gray-300 pb-2 flex items-center gap-3">
+                              {/* Cover Art */}
+                              {currentTrack.coverUrl ? (
+                                <div className="w-12 h-12 flex-shrink-0 border border-gray-400 bg-black overflow-hidden">
+                                  <img src={currentTrack.coverUrl} alt="cover" className="w-full h-full object-cover" />
+                                </div>
+                              ) : (
+                                <div className="w-12 h-12 flex-shrink-0 border border-gray-400 bg-[#0f1021] flex items-center justify-center">
+                                  <svg viewBox="0 0 24 24" className="w-6 h-6 text-blue-400" fill="currentColor">
+                                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                                    <circle cx="12" cy="12" r="4" />
+                                    <circle cx="12" cy="12" r="1.5" fill="#0f1021" />
+                                  </svg>
+                                </div>
+                              )}
+                              <div>
+                                <div className="text-[10px] uppercase tracking-[0.2em] text-gray-600">Now playing</div>
+                                <div className="text-[12px] font-bold text-blue-900">{currentTrack.title}</div>
+                                <div className="text-[11px] text-gray-700">{currentTrack.artist} · {currentTrack.genre}</div>
+                              </div>
                             </div>
 
                             <div className="mb-2 rounded-sm border border-gray-400 bg-[#0f1021] p-3">
@@ -947,8 +991,11 @@ export default function Home() {
                             className="flex flex-col items-center justify-center p-2 text-center hover:bg-blue-900/10 cursor-pointer border border-transparent hover:border-blue-950/20 rounded"
                             onDoubleClick={() => openImageViewer(item)}
                           >
-                            <ImageFileIcon />
+                            {item.type === 'video' ? <VideoFileIcon /> : item.type === 'gif' ? <GifFileIcon /> : <ImageFileIcon />}
                             <div className="text-[11px] truncate w-full mt-1.5">{item.name}</div>
+                            {item.type && item.type !== 'image' && (
+                              <div className="text-[9px] text-purple-700 font-bold uppercase">{item.type}</div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -1229,18 +1276,43 @@ export default function Home() {
                   {/* Image Viewer */}
                   {win.id === 'viewer' && selectedImage && (
                     <div className="flex flex-col items-center justify-between h-full bg-[#f1f1f1] p-2">
-                      <div className="relative w-full flex-1 min-h-[300px] border border-gray-400 bg-black flex items-center justify-center">
-                        <Image
-                          src={selectedImage.src}
-                          alt={selectedImage.name}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                          className="object-contain"
-                        />
+                      <div className="relative w-full flex-1 min-h-[260px] border border-gray-400 bg-black flex items-center justify-center overflow-hidden">
+                        {selectedImage.type === 'video' ? (
+                          <video
+                            key={selectedImage.src}
+                            src={selectedImage.src}
+                            controls
+                            autoPlay
+                            className="max-w-full max-h-full object-contain"
+                          />
+                        ) : selectedImage.type === 'gif' ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={selectedImage.src}
+                            alt={selectedImage.name}
+                            className="max-w-full max-h-full object-contain"
+                          />
+                        ) : (
+                          <Image
+                            src={selectedImage.src}
+                            alt={selectedImage.name}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            className="object-contain"
+                          />
+                        )}
                       </div>
-                      <div className="w-full text-center mt-2 font-mono text-[11px] text-gray-700">
-                        {selectedImage.name} - #{selectedImage.tag}
+                      <div className="w-full mt-2 font-mono text-[11px] text-gray-700 text-center">
+                        {selectedImage.name} — #{selectedImage.tag}
+                        {selectedImage.type && selectedImage.type !== 'image' && (
+                          <span className="ml-2 text-purple-700 font-bold uppercase">[{selectedImage.type}]</span>
+                        )}
                       </div>
+                      {selectedImage.description && (
+                        <div className="w-full mt-1 px-2 py-1 bg-gray-100 border border-gray-300 text-[10px] italic text-gray-600 font-sans">
+                          {selectedImage.description}
+                        </div>
+                      )}
                     </div>
                   )}
 
