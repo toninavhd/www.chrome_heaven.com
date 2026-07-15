@@ -136,12 +136,47 @@ const NetworkIcon = () => (
   </svg>
 );
 
+const BlogIcon = () => (
+  <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Book Cover */}
+    <rect x="5" y="3" width="22" height="26" fill="#a02020" stroke="#000" strokeWidth="1.2" />
+    {/* Page block border */}
+    <rect x="23" y="4" width="3" height="24" fill="#ffffff" />
+    <line x1="26" y1="4" x2="26" y2="28" stroke="#000" strokeWidth="1.2" />
+    {/* Spine line */}
+    <line x1="7" y1="3" x2="7" y2="29" stroke="#501010" strokeWidth="1" />
+    {/* Book label gold */}
+    <rect x="10" y="10" width="10" height="12" fill="#ffd700" stroke="#000" strokeWidth="0.8" />
+    {/* Lines inside label */}
+    <line x1="12" y1="13" x2="18" y2="13" stroke="#805000" strokeWidth="1" />
+    <line x1="12" y1="16" x2="18" y2="16" stroke="#805000" strokeWidth="1" />
+    <line x1="12" y1="19" x2="16" y2="19" stroke="#805000" strokeWidth="1" />
+  </svg>
+);
+
+const AdminIcon = () => (
+  <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Classic Floppy Disk casing */}
+    <rect x="4" y="4" width="24" height="24" fill="#303030" stroke="#000" strokeWidth="1.2" />
+    {/* Label paper */}
+    <rect x="8" y="14" width="16" height="13" fill="#ffffff" stroke="#808080" strokeWidth="0.8" />
+    <rect x="10" y="16" width="12" height="2" fill="#0000d0" />
+    <rect x="10" y="20" width="12" height="1" fill="#808080" />
+    <rect x="10" y="23" width="8" height="1" fill="#808080" />
+    {/* Metal sliding cover */}
+    <rect x="10" y="4" width="8" height="7" fill="#c0c0c0" stroke="#808080" strokeWidth="0.8" />
+    <rect x="12" y="6" width="2" height="3" fill="#000" />
+    {/* Power/Activity LED */}
+    <rect x="25" y="25" width="2" height="2" fill="#00ff00" />
+  </svg>
+);
+
 interface Track {
   id: string;
   title: string;
   artist: string;
   genre: string;
-  soundcloudEmbedUrl: string;
+  soundcloudEmbedUrl?: string;
   audioUrl?: string;
   spotifyUrl?: string;
   bandcampUrl?: string;
@@ -154,14 +189,20 @@ const TRACK_SLUG_MAP: { [key: string]: string } = {
   'bleedmeariver': 'bleedmeariver',
 };
 
-const TRACKS: Track[] = [
+const DEFAULT_TRACKS: Track[] = [
   {
     id: 'nevermind_190bpm_uloe',
     title: 'nevermind 190bpm',
     artist: 'Chrome Heaven',
     genre: 'Local WAV / 190 BPM',
-    soundcloudEmbedUrl: buildSoundCloudEmbedUrl('malice'),
     audioUrl: '/audio/nevermind_190bpm_uloe.wav',
+  },
+  {
+    id: 'lonelystarr',
+    title: 'lonelystarr',
+    artist: 'Chrome Heaven',
+    genre: 'Local WAV / Dreamcore',
+    audioUrl: '/audio/lonelystarr.wav',
   },
   {
     id: 'malice',
@@ -188,13 +229,41 @@ interface GalleryItem {
   tag: string;
 }
 
-const GALLERY_ITEMS: GalleryItem[] = [
+const DEFAULT_GALLERY_ITEMS: GalleryItem[] = [
   { id: 'g1', name: 'paris_2023.bmp', src: '/images/gallery_1.png', tag: 'Paris2023' },
   { id: 'g2', name: 'lost_in_fantasy.bmp', src: '/images/gallery_2.png', tag: 'lost-in-a-fantasy' },
   { id: 'g3', name: 'how_to_start_cult.bmp', src: '/images/gallery_3.png', tag: 'how-2-start-a-cult' },
   { id: 'g4', name: 'nothin_2_say.bmp', src: '/images/gallery_4.png', tag: 'nothin-2-say' },
   { id: 'g5', name: 'malice_cover.bmp', src: '/images/malice_ep_cover.png', tag: 'malice' },
   { id: 'g6', name: 'avatar_uloe.bmp', src: '/images/avatar.png', tag: 'uloee' },
+];
+
+interface BlogPost {
+  id: string;
+  title: string;
+  date: string;
+  content: string;
+  imageSrc?: string;
+  audioSrc?: string;
+}
+
+const DEFAULT_POSTS: BlogPost[] = [
+  {
+    id: 'post1',
+    title: 'Chrome Heaven Portal Upgrade',
+    date: '2026-07-15',
+    content: 'Welcome to the new Chrome Heaven blog and official portal!\n\nI have redesigned the layout to act as a direct blog and official page. I am transitioning away from external platforms like SoundCloud to host my own music and content.\n\nNow, all music tracks and photography edits will be served directly from this page. You can listen to my new tracks in the Windows Media Player window and view high-quality renders in the Visuals folder. More updates coming soon.',
+    imageSrc: '/images/malice_ep_cover.png',
+    audioSrc: '/audio/nevermind_190bpm_uloe.wav'
+  },
+  {
+    id: 'post2',
+    title: 'lonelystarr.wav Preview',
+    date: '2026-07-10',
+    content: 'Here is a preview of my upcoming track \'lonelystarr\'. It is a mix of electronic breakcore and dreamcore synth layers.\n\nYou can listen to the full WAV file by opening the Media Player window and selecting \'lonelystarr\' from the playlist, or play it directly from this journal entry. Let me know what you think on my socials!',
+    imageSrc: '/images/gallery_2.png',
+    audioSrc: '/audio/lonelystarr.wav'
+  }
 ];
 
 interface WindowState {
@@ -230,6 +299,18 @@ export default function Home() {
       width: 480,
       height: 380,
       icon: <TextDocIcon />,
+    },
+    {
+      id: 'blog',
+      title: 'My Diary - Journal',
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      x: 60,
+      y: 50,
+      width: 640,
+      height: 460,
+      icon: <BlogIcon />,
     },
     {
       id: 'music',
@@ -291,13 +372,57 @@ export default function Home() {
       height: 450,
       icon: <ImageFileIcon />,
     },
+    {
+      id: 'admin',
+      title: 'Upload Manager',
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      x: 130,
+      y: 140,
+      width: 440,
+      height: 420,
+      icon: <AdminIcon />,
+    },
   ]);
+
+  // Database loaded states
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [selectedPostId, setSelectedPostId] = useState<string>('');
+
+  // Admin and Login state
+  const [adminPassword, setAdminPassword] = useState('');
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [adminActiveTab, setAdminActiveTab] = useState<'music' | 'visuals' | 'blog'>('music');
+
+  // Music upload state
+  const [uploadTrackTitle, setUploadTrackTitle] = useState('');
+  const [uploadTrackArtist, setUploadTrackArtist] = useState('Chrome Heaven');
+  const [uploadTrackGenre, setUploadTrackGenre] = useState('Electronic');
+  const [uploadTrackFile, setUploadTrackFile] = useState<File | null>(null);
+  const [uploadTrackStatus, setUploadTrackStatus] = useState({ type: '', text: '' });
+
+  // Visuals upload state
+  const [uploadImageName, setUploadImageName] = useState('');
+  const [uploadImageTag, setUploadImageTag] = useState('');
+  const [uploadImageFile, setUploadImageFile] = useState<File | null>(null);
+  const [uploadImageStatus, setUploadImageStatus] = useState({ type: '', text: '' });
+
+  // Blog upload state
+  const [newPostTitle, setNewPostTitle] = useState('');
+  const [newPostDate, setNewPostDate] = useState('');
+  const [newPostContent, setNewPostContent] = useState('');
+  const [newPostAttachedImage, setNewPostAttachedImage] = useState('');
+  const [newPostAttachedAudio, setNewPostAttachedAudio] = useState('');
+  const [newPostStatus, setNewPostStatus] = useState({ type: '', text: '' });
 
   const [activeWindowId, setActiveWindowId] = useState<string>('welcome');
   const [selectedDesktopIcon, setSelectedDesktopIcon] = useState<string | null>(null);
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [time, setTime] = useState('');
-  const [currentTrack, setCurrentTrack] = useState<Track>(TRACKS[0]);
+  const [currentTrack, setCurrentTrack] = useState<Track>(DEFAULT_TRACKS[0]);
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
   const [currentWallpaper, setCurrentWallpaper] = useState(WALLPAPERS[0]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -312,6 +437,54 @@ export default function Home() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+
+  // Load content database on mount
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const res = await fetch('/content.json');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.tracks && data.tracks.length > 0) {
+            setTracks(data.tracks);
+            setCurrentTrack(data.tracks[0]);
+          } else {
+            setTracks(DEFAULT_TRACKS);
+            setCurrentTrack(DEFAULT_TRACKS[0]);
+          }
+          if (data.gallery && data.gallery.length > 0) {
+            setGalleryItems(data.gallery);
+          } else {
+            setGalleryItems(DEFAULT_GALLERY_ITEMS);
+          }
+          if (data.posts && data.posts.length > 0) {
+            setPosts(data.posts);
+            setSelectedPostId(data.posts[0].id);
+          } else {
+            setPosts(DEFAULT_POSTS);
+            setSelectedPostId(DEFAULT_POSTS[0].id);
+          }
+        } else {
+          throw new Error('Non-ok response');
+        }
+      } catch (err) {
+        console.warn('Could not load content.json, falling back to static defaults', err);
+        setTracks(DEFAULT_TRACKS);
+        setCurrentTrack(DEFAULT_TRACKS[0]);
+        setGalleryItems(DEFAULT_GALLERY_ITEMS);
+        setPosts(DEFAULT_POSTS);
+        if (DEFAULT_POSTS.length > 0) {
+          setSelectedPostId(DEFAULT_POSTS[0].id);
+        }
+      }
+    };
+    loadContent();
+  }, []);
+
+  // Update date field default when window is opened
+  useEffect(() => {
+    setNewPostDate(new Date().toISOString().split('T')[0]);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -525,6 +698,15 @@ export default function Home() {
         </div>
 
         <div
+          className={`desktop-icon ${selectedDesktopIcon === 'blog' ? 'selected' : ''}`}
+          onClick={(e) => { e.stopPropagation(); setSelectedDesktopIcon('blog'); }}
+          onDoubleClick={() => openWindow('blog')}
+        >
+          <BlogIcon />
+          <div className="desktop-icon-text">My Diary</div>
+        </div>
+
+        <div
           className={`desktop-icon ${selectedDesktopIcon === 'music' ? 'selected' : ''}`}
           onClick={(e) => { e.stopPropagation(); setSelectedDesktopIcon('music'); }}
           onDoubleClick={() => openWindow('music')}
@@ -558,6 +740,15 @@ export default function Home() {
         >
           <MyComputerIcon />
           <div className="desktop-icon-text">Display Properties</div>
+        </div>
+
+        <div
+          className={`desktop-icon ${selectedDesktopIcon === 'admin' ? 'selected' : ''}`}
+          onClick={(e) => { e.stopPropagation(); setSelectedDesktopIcon('admin'); }}
+          onDoubleClick={() => openWindow('admin')}
+        >
+          <AdminIcon />
+          <div className="desktop-icon-text">Upload Manager</div>
         </div>
 
         <div
@@ -660,7 +851,7 @@ export default function Home() {
                       <div className="w-full md:w-2/5 flex flex-col gap-2 border-r pr-3 select-none">
                         <div className="font-bold text-blue-900 border-b pb-1 mb-1">Now Playing</div>
                         <div className="flex-1 overflow-y-auto max-h-[300px] pr-1 win2k-scroll">
-                          {TRACKS.map((t) => (
+                          {tracks.map((t) => (
                             <div
                               key={t.id}
                               className={`p-2 border-b cursor-pointer text-[11px] ${
@@ -770,7 +961,7 @@ export default function Home() {
                             <div className="mt-2 flex items-center justify-between text-[10px] text-gray-600">
                               <span>Audio source • HTML5</span>
                               <a
-                                href={currentTrack.audioUrl ?? `https://soundcloud.com/uloee/${TRACK_SLUG_MAP[currentTrack.id]}`}
+                                href={currentTrack.audioUrl || (TRACK_SLUG_MAP[currentTrack.id] ? `https://soundcloud.com/uloee/${TRACK_SLUG_MAP[currentTrack.id]}` : 'https://soundcloud.com/uloee')}
                                 className="font-bold text-blue-900 underline"
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -794,11 +985,11 @@ export default function Home() {
                     <div>
                       <div className="bg-gray-100 p-2 mb-3 border flex items-center justify-between text-[11px]">
                         <div>Address: <span className="bg-white px-2 py-0.5 border font-mono">C:\Visuals_and_Edits</span></div>
-                        <div className="text-gray-500">6 Object(s)</div>
+                        <div className="text-gray-500">{galleryItems.length} Object(s)</div>
                       </div>
 
                       <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 p-2">
-                        {GALLERY_ITEMS.map((item) => (
+                        {galleryItems.map((item) => (
                           <div
                             key={item.id}
                             className="flex flex-col items-center justify-center p-2 text-center hover:bg-blue-900/10 cursor-pointer border border-transparent hover:border-blue-950/20 rounded"
@@ -906,6 +1097,633 @@ export default function Home() {
                           </div>
                         </div>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Blog Reader */}
+                  {win.id === 'blog' && (
+                    <div className="flex gap-2 h-full min-h-[360px]">
+                      {/* Left Sidebar: List of posts */}
+                      <div className="w-1/3 border-r pr-2 flex flex-col gap-1.5 select-none">
+                        <div className="font-bold text-blue-900 border-b pb-1 text-[11px] uppercase tracking-wider">Entries</div>
+                        <div className="flex-1 overflow-y-auto max-h-[340px] win2k-scroll pr-1">
+                          {posts.length === 0 ? (
+                            <div className="text-gray-400 text-center italic py-4">No entries yet.</div>
+                          ) : (
+                            posts.map((post) => (
+                              <div
+                                key={post.id}
+                                className={`p-2 border-b cursor-pointer transition-colors duration-100 ${
+                                  selectedPostId === post.id
+                                    ? 'bg-[#000080] text-white font-bold'
+                                    : 'hover:bg-gray-100 text-gray-800'
+                                }`}
+                                onClick={() => setSelectedPostId(post.id)}
+                              >
+                                <div className="truncate text-[11px]">{post.title}</div>
+                                <div className="text-[9px] opacity-75 font-mono mt-0.5">{post.date}</div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right Panel: Content of selected post */}
+                      <div className="flex-1 flex flex-col pl-2 overflow-y-auto win2k-scroll">
+                        {(() => {
+                          const currentPost = posts.find((p) => p.id === selectedPostId);
+                          if (!currentPost) {
+                            return (
+                              <div className="flex h-full items-center justify-center text-gray-400 italic">
+                                Select an entry from the list to read.
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div className="flex flex-col gap-3 select-text leading-relaxed">
+                              {/* Header */}
+                              <div className="border-b pb-2">
+                                <h2 className="text-lg font-bold text-blue-900 tracking-wide">{currentPost.title}</h2>
+                                <div className="text-xs text-gray-500 font-mono italic mt-1">Published on: {currentPost.date}</div>
+                              </div>
+
+                              {/* Body text */}
+                              <div className="text-xs text-gray-800 whitespace-pre-wrap font-sans">
+                                {currentPost.content}
+                              </div>
+
+                              {/* Attached Media Container */}
+                              {(currentPost.imageSrc || currentPost.audioSrc) && (
+                                <div className="mt-4 p-2 bg-gray-50 border border-gray-300 rounded-sm">
+                                  <div className="text-[10px] uppercase font-bold text-gray-500 mb-2 tracking-wider">Attachments:</div>
+                                  <div className="flex flex-col gap-3">
+                                    {/* Image Attachment */}
+                                    {currentPost.imageSrc && (
+                                      <div className="flex flex-col gap-1 items-start">
+                                        <div className="relative border border-gray-400 bg-black cursor-pointer hover:opacity-90 max-w-[200px]" onClick={() => {
+                                          if (currentPost.imageSrc) {
+                                            const matchedImg = galleryItems.find(item => item.src === currentPost.imageSrc);
+                                            if (matchedImg) {
+                                              openImageViewer(matchedImg);
+                                            } else {
+                                              openImageViewer({
+                                                id: 'attached',
+                                                name: currentPost.imageSrc.split('/').pop() || 'attachment.bmp',
+                                                src: currentPost.imageSrc,
+                                                tag: 'Attached'
+                                              });
+                                            }
+                                          }
+                                        }}>
+                                          <img
+                                            src={currentPost.imageSrc}
+                                            alt="Attached media"
+                                            className="max-h-[120px] object-contain"
+                                          />
+                                        </div>
+                                        <span className="text-[9px] text-gray-500 italic">(Double-click/click image to open in Viewer)</span>
+                                      </div>
+                                    )}
+
+                                    {/* Audio Attachment */}
+                                    {currentPost.audioSrc && (
+                                      <div className="flex items-center gap-2">
+                                        <button
+                                          className="win2k-btn bg-blue-50 hover:bg-blue-100 font-bold px-3 py-1 flex items-center gap-1.5"
+                                          onClick={() => {
+                                            if (currentPost.audioSrc) {
+                                              const matchedTrack = tracks.find(t => t.audioUrl === currentPost.audioSrc);
+                                              if (matchedTrack) {
+                                                playTrack(matchedTrack);
+                                                setTimeout(() => {
+                                                  if (audioRef.current) {
+                                                    void audioRef.current.play();
+                                                    setIsPlaying(true);
+                                                    startVisualizer();
+                                                  }
+                                                }, 150);
+                                              } else {
+                                                // Create a temp track if not in list
+                                                const tempTrack = {
+                                                  id: 'temp_' + Date.now(),
+                                                  title: `Attachment - ${currentPost.title}`,
+                                                  artist: 'Chrome Heaven',
+                                                  genre: 'Blog Attachment',
+                                                  audioUrl: currentPost.audioSrc
+                                                };
+                                                setTracks(prev => [...prev, tempTrack]);
+                                                playTrack(tempTrack);
+                                                setTimeout(() => {
+                                                  if (audioRef.current) {
+                                                    void audioRef.current.play();
+                                                    setIsPlaying(true);
+                                                    startVisualizer();
+                                                  }
+                                                }, 150);
+                                              }
+                                            }
+                                          }}
+                                        >
+                                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z"/>
+                                          </svg>
+                                          Play Attachment in Media Player
+                                        </button>
+                                        <span className="text-[10px] text-gray-500 font-mono">({currentPost.audioSrc.split('/').pop()})</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Upload Manager (Admin Control) */}
+                  {win.id === 'admin' && (
+                    <div className="flex flex-col h-full bg-[#d0d0c8]">
+                      {!isAdminLoggedIn ? (
+                        /* Login Screen */
+                        <div className="flex-1 flex items-center justify-center p-4">
+                          <div className="max-w-sm w-full bg-[#d0d0c8] p-4 win2k-border-inset flex flex-col gap-4">
+                            <div className="bg-gradient-to-r from-blue-900 to-blue-400 text-white font-bold p-1 text-[11px] flex items-center gap-1.5 select-none">
+                              <AdminIcon />
+                              <span>Logon to Admin Console</span>
+                            </div>
+                            <div className="flex gap-4 items-center p-2">
+                              {/* Classic keys/user illustration */}
+                              <svg className="w-12 h-12 text-gray-600 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12.63 2A6.5 6.5 0 0 0 7 8.12V10h1.5v1.5H10v1.5h1.5v1.5H13l3.18-3.18a6.5 6.5 0 0 0 2.82-5.32 6.5 6.5 0 0 0-6.37-6.13zm5.37 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+                              </svg>
+                              <div className="flex flex-col gap-2 flex-1">
+                                <label className="text-[11px] text-gray-700 font-sans">Type the administrator password:</label>
+                                <input
+                                  type="password"
+                                  placeholder="Password..."
+                                  className="w-full px-2 py-1 bg-white border border-gray-400 text-black text-xs win2k-border-inset outline-none"
+                                  value={adminPassword}
+                                  onChange={(e) => setAdminPassword(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      if (adminPassword.toLowerCase() === 'heaven') {
+                                        setIsAdminLoggedIn(true);
+                                      } else {
+                                        alert('Incorrect password. Try "heaven"');
+                                      }
+                                    }
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex justify-end gap-2 pr-2">
+                              <button
+                                className="win2k-btn font-bold px-4 py-1"
+                                onClick={() => {
+                                  if (adminPassword.toLowerCase() === 'heaven') {
+                                    setIsAdminLoggedIn(true);
+                                  } else {
+                                    alert('Incorrect password. Try "heaven"');
+                                  }
+                                }}
+                              >
+                                OK
+                              </button>
+                              <button
+                                className="win2k-btn px-4 py-1"
+                                onClick={() => closeWindow('admin')}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                            <div className="text-[9px] text-gray-500 text-center font-mono mt-1">Hint: Password is &quot;heaven&quot;</div>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Admin Panel Tabs and Forms */
+                        <div className="flex-1 flex flex-col min-h-[340px]">
+                          {/* Tabs Row */}
+                          <div className="flex border-b border-gray-400 gap-1 pr-2 select-none">
+                            <button
+                              className={`px-3 py-1 text-[11px] rounded-t-sm border border-b-0 ${
+                                adminActiveTab === 'music'
+                                  ? 'bg-[#d0d0c8] border-white border-r-[#404040] font-bold z-10 relative -mb-px'
+                                  : 'bg-gray-200 border-gray-300 border-b-gray-400 hover:bg-gray-100'
+                              }`}
+                              onClick={() => setAdminActiveTab('music')}
+                            >
+                              Music Track
+                            </button>
+                            <button
+                              className={`px-3 py-1 text-[11px] rounded-t-sm border border-b-0 ${
+                                adminActiveTab === 'visuals'
+                                  ? 'bg-[#d0d0c8] border-white border-r-[#404040] font-bold z-10 relative -mb-px'
+                                  : 'bg-gray-200 border-gray-300 border-b-gray-400 hover:bg-gray-100'
+                              }`}
+                              onClick={() => setAdminActiveTab('visuals')}
+                            >
+                              Visual Image
+                            </button>
+                            <button
+                              className={`px-3 py-1 text-[11px] rounded-t-sm border border-b-0 ${
+                                adminActiveTab === 'blog'
+                                  ? 'bg-[#d0d0c8] border-white border-r-[#404040] font-bold z-10 relative -mb-px'
+                                  : 'bg-gray-200 border-gray-300 border-b-gray-400 hover:bg-gray-100'
+                              }`}
+                              onClick={() => setAdminActiveTab('blog')}
+                            >
+                              Diary Post
+                            </button>
+                          </div>
+
+                          {/* Tab Content Box */}
+                          <div className="flex-1 bg-[#d0d0c8] border border-t-0 border-white border-r-[#404040] border-b-[#404040] p-4 flex flex-col gap-3">
+                            
+                            {/* Tab 1: Music Upload */}
+                            {adminActiveTab === 'music' && (
+                              <div className="flex flex-col gap-3 text-[11px]">
+                                <div className="font-bold text-blue-900 border-b pb-1 uppercase tracking-wider">Upload New Music Track</div>
+                                
+                                <div className="flex flex-col gap-1">
+                                  <label className="font-bold text-gray-700">Track Title:</label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. malice_demo"
+                                    className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs"
+                                    value={uploadTrackTitle}
+                                    onChange={(e) => setUploadTrackTitle(e.target.value)}
+                                  />
+                                </div>
+
+                                <div className="flex gap-2">
+                                  <div className="flex-1 flex flex-col gap-1">
+                                    <label className="font-bold text-gray-700">Artist:</label>
+                                    <input
+                                      type="text"
+                                      placeholder="Chrome Heaven"
+                                      className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs"
+                                      value={uploadTrackArtist}
+                                      onChange={(e) => setUploadTrackArtist(e.target.value)}
+                                    />
+                                  </div>
+                                  <div className="flex-1 flex flex-col gap-1">
+                                    <label className="font-bold text-gray-700">Genre/Alias:</label>
+                                    <input
+                                      type="text"
+                                      placeholder="Local WAV / Dreamcore"
+                                      className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs"
+                                      value={uploadTrackGenre}
+                                      onChange={(e) => setUploadTrackGenre(e.target.value)}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-col gap-1">
+                                  <label className="font-bold text-gray-700">Audio File (WAV, MP3):</label>
+                                  <input
+                                    type="file"
+                                    accept="audio/*"
+                                    className="w-full text-xs"
+                                    onChange={(e) => {
+                                      if (e.target.files && e.target.files.length > 0) {
+                                        setUploadTrackFile(e.target.files[0]);
+                                      }
+                                    }}
+                                  />
+                                </div>
+
+                                {uploadTrackStatus.text && (
+                                  <div className={`p-2 border font-mono text-[10px] ${
+                                    uploadTrackStatus.type === 'success' ? 'bg-green-100 border-green-500 text-green-900' : 'bg-orange-100 border-orange-500 text-orange-900'
+                                  }`}>
+                                    {uploadTrackStatus.text}
+                                  </div>
+                                )}
+
+                                <div className="mt-auto flex justify-between items-center pt-2">
+                                  <span className="text-[10px] text-gray-500 italic">Self-host files locally</span>
+                                  <button
+                                    className="win2k-btn font-bold px-4 py-1.5"
+                                    onClick={async () => {
+                                      if (!uploadTrackTitle || !uploadTrackFile) {
+                                        alert('Please provide a title and select a file.');
+                                        return;
+                                      }
+                                      setUploadTrackStatus({ type: 'loading', text: 'Processing track...' });
+                                      
+                                      const formData = new FormData();
+                                      formData.append('action', 'upload_track');
+                                      formData.append('title', uploadTrackTitle);
+                                      formData.append('artist', uploadTrackArtist);
+                                      formData.append('genre', uploadTrackGenre);
+                                      formData.append('file', uploadTrackFile);
+
+                                      try {
+                                        const res = await fetch('/api/content', {
+                                          method: 'POST',
+                                          body: formData
+                                        });
+                                        const data = await res.json();
+                                        if (res.ok && data.success) {
+                                          setTracks(data.db.tracks);
+                                          setUploadTrackStatus({ type: 'success', text: `Track "${uploadTrackTitle}" successfully saved to disk! Registered in WMP.` });
+                                          setUploadTrackTitle('');
+                                          setUploadTrackFile(null);
+                                        } else {
+                                          throw new Error(data.message || 'API error');
+                                        }
+                                      } catch (err: any) {
+                                        console.warn('API error, executing session simulation fallback:', err);
+                                        // Fallback simulation in production
+                                        const fileUrl = URL.createObjectURL(uploadTrackFile);
+                                        const simulatedId = 'sim_' + Date.now();
+                                        const simulatedTrack = {
+                                          id: simulatedId,
+                                          title: uploadTrackTitle,
+                                          artist: uploadTrackArtist,
+                                          genre: uploadTrackGenre,
+                                          audioUrl: fileUrl
+                                        };
+                                        setTracks(prev => [...prev, simulatedTrack]);
+                                        setUploadTrackStatus({ 
+                                          type: 'success', 
+                                          text: `Session Simulation: Track "${uploadTrackTitle}" registered in WMP. (Preview only; run dev server to write to disk)` 
+                                        });
+                                        setUploadTrackTitle('');
+                                        setUploadTrackFile(null);
+                                      }
+                                    }}
+                                  >
+                                    Upload Track
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Tab 2: Visuals Upload */}
+                            {adminActiveTab === 'visuals' && (
+                              <div className="flex flex-col gap-3 text-[11px]">
+                                <div className="font-bold text-blue-900 border-b pb-1 uppercase tracking-wider">Upload New Visual Image</div>
+                                
+                                <div className="flex flex-col gap-1">
+                                  <label className="font-bold text-gray-700">Display Name:</label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. blue_dreams.bmp"
+                                    className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs"
+                                    value={uploadImageName}
+                                    onChange={(e) => setUploadImageName(e.target.value)}
+                                  />
+                                </div>
+
+                                <div className="flex flex-col gap-1">
+                                  <label className="font-bold text-gray-700">Tag / Theme:</label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. Tenerife2026"
+                                    className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs"
+                                    value={uploadImageTag}
+                                    onChange={(e) => setUploadImageTag(e.target.value)}
+                                  />
+                                </div>
+
+                                <div className="flex flex-col gap-1">
+                                  <label className="font-bold text-gray-700">Image File (PNG, JPG, BMP):</label>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="w-full text-xs"
+                                    onChange={(e) => {
+                                      if (e.target.files && e.target.files.length > 0) {
+                                        setUploadImageFile(e.target.files[0]);
+                                      }
+                                    }}
+                                  />
+                                </div>
+
+                                {uploadImageStatus.text && (
+                                  <div className={`p-2 border font-mono text-[10px] ${
+                                    uploadImageStatus.type === 'success' ? 'bg-green-100 border-green-500 text-green-900' : 'bg-orange-100 border-orange-500 text-orange-900'
+                                  }`}>
+                                    {uploadImageStatus.text}
+                                  </div>
+                                )}
+
+                                <div className="mt-auto flex justify-between items-center pt-2">
+                                  <span className="text-[10px] text-gray-500 italic">Self-host images locally</span>
+                                  <button
+                                    className="win2k-btn font-bold px-4 py-1.5"
+                                    onClick={async () => {
+                                      if (!uploadImageName || !uploadImageFile) {
+                                        alert('Please provide a name and select an image file.');
+                                        return;
+                                      }
+                                      setUploadImageStatus({ type: 'loading', text: 'Processing image...' });
+
+                                      const formData = new FormData();
+                                      formData.append('action', 'upload_image');
+                                      formData.append('name', uploadImageName);
+                                      formData.append('tag', uploadImageTag);
+                                      formData.append('file', uploadImageFile);
+
+                                      try {
+                                        const res = await fetch('/api/content', {
+                                          method: 'POST',
+                                          body: formData
+                                        });
+                                        const data = await res.json();
+                                        if (res.ok && data.success) {
+                                          setGalleryItems(data.db.gallery);
+                                          setUploadImageStatus({ type: 'success', text: `Image "${uploadImageName}" successfully saved to disk! Registered in Visuals Folder.` });
+                                          setUploadImageName('');
+                                          setUploadImageFile(null);
+                                        } else {
+                                          throw new Error(data.message || 'API error');
+                                        }
+                                      } catch (err: any) {
+                                        console.warn('API error, executing session simulation fallback:', err);
+                                        // Fallback simulation in production
+                                        const fileUrl = URL.createObjectURL(uploadImageFile);
+                                        const simulatedId = 'sim_' + Date.now();
+                                        const simulatedImage = {
+                                          id: simulatedId,
+                                          name: uploadImageName.endsWith('.bmp') || uploadImageName.endsWith('.png') || uploadImageName.endsWith('.jpg') ? uploadImageName : `${uploadImageName}.bmp`,
+                                          src: fileUrl,
+                                          tag: uploadImageTag || 'visual'
+                                        };
+                                        setGalleryItems(prev => [...prev, simulatedImage]);
+                                        setUploadImageStatus({ 
+                                          type: 'success', 
+                                          text: `Session Simulation: Image registered in Visuals Folder. (Preview only; run dev server to write to disk)` 
+                                        });
+                                        setUploadImageName('');
+                                        setUploadImageFile(null);
+                                      }
+                                    }}
+                                  >
+                                    Upload Image
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Tab 3: Blog/Diary Post Writing */}
+                            {adminActiveTab === 'blog' && (
+                              <div className="flex flex-col gap-3 text-[11px] h-full">
+                                <div className="font-bold text-blue-900 border-b pb-1 uppercase tracking-wider">Publish New Diary Post</div>
+                                
+                                <div className="flex gap-2">
+                                  <div className="flex-1 flex flex-col gap-1">
+                                    <label className="font-bold text-gray-700">Entry Title:</label>
+                                    <input
+                                      type="text"
+                                      placeholder="Title of your post..."
+                                      className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs"
+                                      value={newPostTitle}
+                                      onChange={(e) => setNewPostTitle(e.target.value)}
+                                    />
+                                  </div>
+                                  <div className="w-[100px] flex flex-col gap-1">
+                                    <label className="font-bold text-gray-700">Date:</label>
+                                    <input
+                                      type="text"
+                                      className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-mono text-center"
+                                      value={newPostDate}
+                                      onChange={(e) => setNewPostDate(e.target.value)}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="flex-1 flex flex-col gap-1 min-h-[100px]">
+                                  <label className="font-bold text-gray-700">Entry Content:</label>
+                                  <textarea
+                                    placeholder="Write your entry text here..."
+                                    className="flex-1 p-2 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs font-sans resize-none win2k-scroll"
+                                    value={newPostContent}
+                                    onChange={(e) => setNewPostContent(e.target.value)}
+                                  />
+                                </div>
+
+                                <div className="flex gap-2">
+                                  {/* Attached image selector */}
+                                  <div className="flex-1 flex flex-col gap-1">
+                                    <label className="font-bold text-gray-700">Attach Image:</label>
+                                    <select
+                                      className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs"
+                                      value={newPostAttachedImage}
+                                      onChange={(e) => setNewPostAttachedImage(e.target.value)}
+                                    >
+                                      <option value="">(None)</option>
+                                      {galleryItems.map(item => (
+                                        <option key={item.id} value={item.src}>{item.name}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  {/* Attached audio selector */}
+                                  <div className="flex-1 flex flex-col gap-1">
+                                    <label className="font-bold text-gray-700">Attach Music Track:</label>
+                                    <select
+                                      className="px-2 py-1 bg-white border border-gray-400 win2k-border-inset outline-none text-black text-xs"
+                                      value={newPostAttachedAudio}
+                                      onChange={(e) => setNewPostAttachedAudio(e.target.value)}
+                                    >
+                                      <option value="">(None)</option>
+                                      {tracks.map(track => (
+                                        <option key={track.id} value={track.audioUrl}>{track.title}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </div>
+
+                                {newPostStatus.text && (
+                                  <div className={`p-2 border font-mono text-[10px] ${
+                                    newPostStatus.type === 'success' ? 'bg-green-100 border-green-500 text-green-900' : 'bg-orange-100 border-orange-500 text-orange-900'
+                                  }`}>
+                                    {newPostStatus.text}
+                                  </div>
+                                )}
+
+                                <div className="flex justify-between items-center pt-1 mt-auto">
+                                  <button
+                                    className="win2k-btn bg-red-100 border-red-400 text-red-950 font-bold px-3 py-1"
+                                    onClick={() => {
+                                      setIsAdminLoggedIn(false);
+                                      setAdminPassword('');
+                                    }}
+                                  >
+                                    Log Off
+                                  </button>
+                                  <button
+                                    className="win2k-btn font-bold px-4 py-1.5"
+                                    onClick={async () => {
+                                      if (!newPostTitle || !newPostContent) {
+                                        alert('Please provide a title and content.');
+                                        return;
+                                      }
+                                      setNewPostStatus({ type: 'loading', text: 'Saving post...' });
+
+                                      const formData = new FormData();
+                                      formData.append('action', 'create_post');
+                                      formData.append('title', newPostTitle);
+                                      formData.append('date', newPostDate);
+                                      formData.append('content', newPostContent);
+                                      formData.append('imageSrc', newPostAttachedImage);
+                                      formData.append('audioSrc', newPostAttachedAudio);
+
+                                      try {
+                                        const res = await fetch('/api/content', {
+                                          method: 'POST',
+                                          body: formData
+                                        });
+                                        const data = await res.json();
+                                        if (res.ok && data.success) {
+                                          setPosts(data.db.posts);
+                                          setSelectedPostId(data.post.id);
+                                          setNewPostStatus({ type: 'success', text: `Post "${newPostTitle}" published successfully to disk!` });
+                                          setNewPostTitle('');
+                                          setNewPostContent('');
+                                          setNewPostAttachedImage('');
+                                          setNewPostAttachedAudio('');
+                                        } else {
+                                          throw new Error(data.message || 'API error');
+                                        }
+                                      } catch (err: any) {
+                                        console.warn('API error, executing session simulation fallback:', err);
+                                        // Fallback simulation in production
+                                        const simulatedId = 'sim_p_' + Date.now();
+                                        const simulatedPost = {
+                                          id: simulatedId,
+                                          title: newPostTitle,
+                                          date: newPostDate || new Date().toISOString().split('T')[0],
+                                          content: newPostContent,
+                                          imageSrc: newPostAttachedImage,
+                                          audioSrc: newPostAttachedAudio
+                                        };
+                                        setPosts(prev => [simulatedPost, ...prev]);
+                                        setSelectedPostId(simulatedId);
+                                        setNewPostStatus({ 
+                                          type: 'success', 
+                                          text: `Session Simulation: Diary post added. (Preview only; run dev server to write to disk)` 
+                                        });
+                                        setNewPostTitle('');
+                                        setNewPostContent('');
+                                        setNewPostAttachedImage('');
+                                        setNewPostAttachedAudio('');
+                                      }
+                                    }}
+                                  >
+                                    Publish Post
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -1043,6 +1861,10 @@ export default function Home() {
                   <TextDocIcon />
                   <span>Welcome.txt</span>
                 </div>
+                <div className="px-3 py-1.5 hover:bg-[#000080] hover:text-white cursor-default flex items-center gap-2" onClick={() => openWindow('blog')}>
+                  <BlogIcon />
+                  <span>My Diary (Blog)</span>
+                </div>
                 <div className="px-3 py-1.5 hover:bg-[#000080] hover:text-white cursor-default flex items-center gap-2" onClick={() => openWindow('music')}>
                   <MediaPlayerIcon />
                   <span>Windows Media Player</span>
@@ -1058,6 +1880,10 @@ export default function Home() {
                 <div className="px-3 py-1.5 hover:bg-[#000080] hover:text-white cursor-default flex items-center gap-2" onClick={() => openWindow('settings')}>
                   <MyComputerIcon />
                   <span>Display Settings</span>
+                </div>
+                <div className="px-3 py-1.5 hover:bg-[#000080] hover:text-white cursor-default flex items-center gap-2" onClick={() => openWindow('admin')}>
+                  <AdminIcon />
+                  <span>Upload Manager</span>
                 </div>
                 <div className="border-t border-gray-400 my-1"></div>
                 <div className="px-3 py-1.5 hover:bg-[#000080] hover:text-white cursor-default flex items-center gap-2" onClick={() => alert("Shut Down simulation: Goodbye!")}>
