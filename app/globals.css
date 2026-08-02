@@ -1,0 +1,398 @@
+@import "tailwindcss";
+
+:root {
+  --win-bg: #386ca0;
+  --win-gray: #d0d0c8;
+  --win-dark-gray: #808080;
+  --win-deep-gray: #404040;
+  --win-white: #ffffff;
+  --win-blue-left: #000080;
+  --win-blue-right: #1084d0;
+  --win-blue-text: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--win-bg);
+  background-image: url('https://sadhost.neocities.org/images/tiles/fence.gif');
+  background-repeat: repeat;
+  background-attachment: fixed;
+  font-family: Tahoma, 'MS Sans Serif', -apple-system, sans-serif;
+  color: #000;
+  font-size: 11px;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  user-select: none;
+  cursor: url('https://www.cursor.cc/cursor3d/33603.png'), auto;
+}
+
+/* Classic Win2k 3D Borders */
+.win2k-border {
+  border: 1px solid var(--win-white);
+  border-right-color: var(--win-deep-gray);
+  border-bottom-color: var(--win-deep-gray);
+  box-shadow: inset 1px 1px 0px var(--win-white),
+              1px 1px 0px #000000;
+}
+
+.win2k-border-inset {
+  border: 1px solid var(--win-dark-gray);
+  border-right-color: var(--win-white);
+  border-bottom-color: var(--win-white);
+  box-shadow: inset 1px 1px 0px var(--win-deep-gray);
+  background-color: var(--win-white);
+}
+
+.win2k-window {
+  background-color: var(--win-gray);
+  padding: 3px;
+  border: 2px solid;
+  border-top-color: var(--win-white);
+  border-left-color: var(--win-white);
+  border-right-color: var(--win-deep-gray);
+  border-bottom-color: var(--win-deep-gray);
+  box-shadow: inset 1px 1px 0px var(--win-white),
+              1px 1px 0px 0px #000000;
+}
+
+/* Title Bar styling */
+.win2k-title-bar {
+  background: linear-gradient(90deg, var(--win-blue-left) 0%, var(--win-blue-right) 100%);
+  color: var(--win-blue-text);
+  padding: 3px 4px;
+  font-weight: bold;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  letter-spacing: 0.5px;
+  height: 20px;
+}
+
+.win2k-title-bar.inactive {
+  background: linear-gradient(90deg, var(--win-dark-gray) 0%, var(--win-gray) 100%);
+  color: var(--win-gray);
+}
+
+/* Win2k Button */
+.win2k-btn {
+  background-color: var(--win-gray);
+  border: 1px solid var(--win-white);
+  border-right-color: var(--win-deep-gray);
+  border-bottom-color: var(--win-deep-gray);
+  box-shadow: inset 1px 1px 0px var(--win-white);
+  color: #000;
+  font-size: 11px;
+  padding: 3px 10px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+}
+
+.win2k-btn:active:not(:disabled) {
+  border: 1px solid var(--win-deep-gray);
+  border-right-color: var(--win-white);
+  border-bottom-color: var(--win-white);
+  box-shadow: inset 1px 1px 0px var(--win-dark-gray);
+  padding: 4px 9px 2px 11px;
+}
+
+.win2k-btn:disabled {
+  color: var(--win-dark-gray);
+  text-shadow: 1px 1px 0px var(--win-white);
+  cursor: not-allowed;
+}
+
+/* Close/Min/Max Titlebar buttons */
+.win2k-title-btn {
+  width: 16px;
+  height: 14px;
+  background-color: var(--win-gray);
+  border: 1px solid var(--win-white);
+  border-right-color: var(--win-deep-gray);
+  border-bottom-color: var(--win-deep-gray);
+  box-shadow: inset 0.5px 0.5px 0px var(--win-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: bold;
+  color: #000;
+  cursor: pointer;
+  outline: none;
+}
+
+.win2k-title-btn:active {
+  border: 1px solid var(--win-deep-gray);
+  border-right-color: var(--win-white);
+  border-bottom-color: var(--win-white);
+  box-shadow: inset 0.5px 0.5px 0px var(--win-dark-gray);
+}
+
+/* Menu bar */
+.win2k-menu {
+  display: flex;
+  gap: 10px;
+  padding: 2px 4px;
+  border-bottom: 1px solid var(--win-dark-gray);
+  font-size: 11px;
+}
+
+.win2k-menu-item {
+  cursor: default;
+  padding: 2px 5px;
+}
+
+.win2k-menu-item:hover {
+  background-color: var(--win-blue-left);
+  color: white;
+}
+
+/* Desktop Icon Selection Styling (Windows 95 style) */
+.desktop-icon {
+  width: 75px;
+  height: 75px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  font-size: 11px;
+  margin: 10px;
+  padding: 5px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.desktop-icon-text {
+  margin-top: 4px;
+  padding: 1px 4px;
+  word-break: break-all;
+  line-height: 1.2;
+  text-shadow: 1px 1px 1px #000;
+  border: 1px solid transparent;
+}
+
+/* Windows Media Player battery visualizer */
+.wmp-battery-shell {
+  background: radial-gradient(circle at top left, #9ec6ff, #386ca0 40%, #0b1c34 100%);
+  border: 2px solid #8da5d2;
+  box-shadow: inset 0 1px 0 #c8d6ff, inset 0 -1px 0 #0f2147;
+  border-radius: 6px;
+  position: relative;
+  min-height: 88px;
+}
+
+.wmp-battery-tip {
+  position: absolute;
+  top: 10px;
+  right: -10px;
+  width: 10px;
+  height: 40px;
+  background: linear-gradient(180deg, #c8d6ff, #385d94);
+  border: 2px solid #8da5d2;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+}
+
+.wmp-battery-grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 4px;
+  padding: 10px;
+  align-items: end;
+  height: 100%;
+}
+
+.wmp-battery-cell {
+  background: linear-gradient(180deg, #2c4f7d, #1c2a45);
+  border: 1px solid #7094d7;
+  border-bottom: 3px solid #0b1e44;
+  border-radius: 3px;
+  min-height: 20px;
+  display: flex;
+  align-items: flex-end;
+  padding: 2px;
+}
+
+.wmp-battery-cell-fill {
+  width: 100%;
+  border-radius: 2px;
+  transition: height 0.12s ease;
+}
+
+.desktop-icon.selected .desktop-icon-text {
+  background-color: var(--win-blue-left);
+  color: var(--win-white);
+  text-shadow: none;
+  border: 1px dotted var(--win-white);
+}
+
+.desktop-icon.selected .desktop-icon-svg {
+  /* Classic selection blue tint overlay on the icon */
+  filter: brightness(0.6) sepia(1) hue-rotate(200deg) saturate(4.5);
+  opacity: 0.85;
+}
+
+.desktop-icon-img {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 5px;
+}
+
+/* Custom Scrollbar classic style */
+.win2k-scroll::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+.win2k-scroll::-webkit-scrollbar-track {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2' height='2'%3E%3Crect width='1' height='1' fill='%23ffffff'/%3E%3Crect x='1' width='1' height='1' fill='%23d0d0c8'/%3E%3Crect y='1' width='1' height='1' fill='%23d0d0c8'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%23ffffff'/%3E%3C/svg%3E") repeat;
+}
+
+.win2k-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--win-gray);
+  border: 1px solid var(--win-white);
+  border-right-color: var(--win-deep-gray);
+  border-bottom-color: var(--win-deep-gray);
+  box-shadow: inset 1px 1px 0px var(--win-white);
+}
+
+.win2k-scroll::-webkit-scrollbar-button {
+  display: block;
+  background-color: var(--win-gray);
+  border: 1px solid var(--win-white);
+  border-right-color: var(--win-deep-gray);
+  border-bottom-color: var(--win-deep-gray);
+  width: 16px;
+  height: 16px;
+}
+
+/* Status Bar */
+.win2k-status-bar {
+  display: flex;
+  margin-top: 2px;
+  background-color: var(--win-gray);
+  border: 1px solid var(--win-dark-gray);
+  border-right-color: var(--win-white);
+  border-bottom-color: var(--win-white);
+  box-shadow: inset 1px 1px 0px var(--win-deep-gray);
+  font-size: 11px;
+}
+
+.win2k-status-field {
+  padding: 3px 6px;
+  border-right: 1px solid var(--win-dark-gray);
+}
+
+.win2k-status-field:last-child {
+  border-right: none;
+  flex: 1;
+}
+
+/* Taskbar styling */
+.win95-taskbar {
+  height: 38px;
+  background-color: var(--win-gray);
+  border-top: 2px solid var(--win-white);
+  box-shadow: 0 -1px 0 var(--win-dark-gray);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  z-index: 50;
+  position: relative;
+}
+
+/* Sunken border for system tray */
+.win95-tray {
+  height: 28px;
+  background-color: var(--win-gray);
+  border: 1px solid var(--win-dark-gray);
+  border-right-color: var(--win-white);
+  border-bottom-color: var(--win-white);
+  box-shadow: inset 1px 1px 0px var(--win-deep-gray);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+}
+
+/* Start button styling */
+.start-btn {
+  height: 28px;
+  background-color: var(--win-gray);
+  border: 2px solid;
+  border-top-color: var(--win-white);
+  border-left-color: var(--win-white);
+  border-right-color: var(--win-deep-gray);
+  border-bottom-color: var(--win-deep-gray);
+  box-shadow: inset 1px 1px 0px var(--win-white);
+  font-weight: bold;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.start-btn:active, .start-btn.pressed {
+  border: 2px solid;
+  border-top-color: var(--win-deep-gray);
+  border-left-color: var(--win-deep-gray);
+  border-right-color: var(--win-white);
+  border-bottom-color: var(--win-white);
+  box-shadow: inset 1px 1px 0px var(--win-dark-gray);
+  padding: 3px 5px 1px 7px;
+}
+
+/* Active window button inside taskbar */
+.taskbar-tab {
+  height: 28px;
+  min-width: 100px;
+  max-width: 140px;
+  background-color: var(--win-gray);
+  border: 2px solid;
+  border-top-color: var(--win-white);
+  border-left-color: var(--win-white);
+  border-right-color: var(--win-deep-gray);
+  border-bottom-color: var(--win-deep-gray);
+  box-shadow: inset 1px 1px 0px var(--win-white);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.taskbar-tab.active {
+  background-color: #e6e6e6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2' height='2'%3E%3Crect width='1' height='1' fill='%23ffffff'/%3E%3Crect x='1' width='1' height='1' fill='%23d0d0c8'/%3E%3Crect y='1' width='1' height='1' fill='%23d0d0c8'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%23ffffff'/%3E%3C/svg%3E");
+  border-top-color: var(--win-deep-gray);
+  border-left-color: var(--win-deep-gray);
+  border-right-color: var(--win-white);
+  border-bottom-color: var(--win-white);
+  box-shadow: inset 1px 1px 0px var(--win-dark-gray);
+  padding: 1px 5px -1px 7px;
+}
+
+/* Typography elements */
+.fraktur-title {
+  font-family: 'Cinzel Decorative', serif;
+}
+
+.jp-text {
+  font-family: 'Noto Serif JP', serif;
+}
