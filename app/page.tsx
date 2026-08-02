@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import AudioVisualizer from './components/AudioVisualizer';
 
 // Windows 95/98 Pixel-Art SVGs
 const MyComputerIcon = () => (
@@ -201,19 +202,11 @@ interface Track {
   title: string;
   artist: string;
   genre: string;
-  soundcloudEmbedUrl?: string;
   audioUrl?: string;
   coverUrl?: string;
   spotifyUrl?: string;
   bandcampUrl?: string;
 }
-
-const buildSoundCloudEmbedUrl = (slug: string) => `https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/uloee/${slug}&color=%23082468&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false&buying=false&download=false&sharing=false&show_playcount=false`;
-
-const TRACK_SLUG_MAP: { [key: string]: string } = {
-  malice: 'malice',
-  'bleedmeariver': 'bleedmeariver',
-};
 
 const DEFAULT_TRACKS: Track[] = [
   {
@@ -235,18 +228,16 @@ const DEFAULT_TRACKS: Track[] = [
     title: 'ｍａｌｉｃｅ [EP]',
     artist: 'Chrome Heaven',
     genre: 'Electronic / Dreamcore',
-    soundcloudEmbedUrl: buildSoundCloudEmbedUrl('malice'),
+    audioUrl: '/audio/nevermind_190bpm_uloe.wav',
   },
   {
     id: 'bleedmeariver',
     title: 'BleedMeARiver',
     artist: 'Chrome Heaven',
     genre: 'Electronic',
-    soundcloudEmbedUrl: buildSoundCloudEmbedUrl('bleedmeariver'),
+    audioUrl: '/audio/lonelystarr.wav',
   },
 ];
-
-const BATTERY_CELLS = 10;
 
 interface GalleryItem {
   id: string;
@@ -419,7 +410,8 @@ export default function Home() {
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(0.85);
-  const [visualizerBars, setVisualizerBars] = useState<number[]>(Array.from({ length: BATTERY_CELLS }, () => 8));
+  const [visualizerPreset, setVisualizerPreset] = useState<string>('wmp_battery');
+  const [isVisualizerExpanded, setIsVisualizerExpanded] = useState(false);
 
   const desktopRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -533,6 +525,10 @@ export default function Home() {
       audioContextRef.current = new AudioContextImpl();
     }
 
+    if (audioContextRef.current.state === 'suspended') {
+      void audioContextRef.current.resume();
+    }
+
     if (!analyserRef.current) {
       analyserRef.current = audioContextRef.current.createAnalyser();
       analyserRef.current.fftSize = 256;
@@ -540,32 +536,6 @@ export default function Home() {
       sourceRef.current.connect(analyserRef.current);
       analyserRef.current.connect(audioContextRef.current.destination);
     }
-
-    stopVisualizer();
-    const bufferLength = analyserRef.current!.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    const draw = () => {
-      if (!audioRef.current || audioRef.current.paused || audioRef.current.ended) {
-        setIsPlaying(false);
-        stopVisualizer();
-        return;
-      }
-
-      analyserRef.current?.getByteFrequencyData(dataArray);
-      const nextBars = Array.from({ length: BATTERY_CELLS }, (_, index) => {
-        const start = Math.floor((index / BATTERY_CELLS) * bufferLength);
-        const end = Math.floor(((index + 1) / BATTERY_CELLS) * bufferLength);
-        const average = dataArray.slice(start, end).reduce((sum, value) => sum + value, 0) / Math.max(1, end - start);
-        const height = Math.max(10, Math.min(48, Math.round((average / 255) * 42) + 6));
-        return height;
-      });
-
-      setVisualizerBars(nextBars);
-      animationFrameRef.current = requestAnimationFrame(draw);
-    };
-
-    draw();
   };
 
   const togglePlayback = () => {
@@ -601,6 +571,27 @@ export default function Home() {
   const handleMetadataLoaded = () => {
     if (!audioRef.current) return;
     setDuration(audioRef.current.duration || 0);
+  };
+
+  const handleSeek = (newTime: number) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
+
+  const playNextTrack = () => {
+    const trackList = tracks.length > 0 ? tracks : DEFAULT_TRACKS;
+    const currentIndex = trackList.findIndex(t => t.id === currentTrack.id);
+    const nextIndex = (currentIndex + 1) % trackList.length;
+    setCurrentTrack(trackList[nextIndex]);
+  };
+
+  const playPrevTrack = () => {
+    const trackList = tracks.length > 0 ? tracks : DEFAULT_TRACKS;
+    const currentIndex = trackList.findIndex(t => t.id === currentTrack.id);
+    const prevIndex = (currentIndex - 1 + trackList.length) % trackList.length;
+    setCurrentTrack(trackList[prevIndex]);
   };
 
   const openWindow = (id: string) => {
@@ -827,150 +818,162 @@ export default function Home() {
                   {/* Windows Media Player */}
                   {win.id === 'music' && (
                     <div className="flex flex-col md:flex-row gap-4 h-full">
-                      {/* Left: Tracks Playlist */}
-                      <div className="w-full md:w-2/5 flex flex-col gap-2 border-r pr-3 select-none">
-                        <div className="font-bold text-blue-900 border-b pb-1 mb-1">Now Playing</div>
-                        <div className="flex-1 overflow-y-auto max-h-[300px] pr-1 win2k-scroll">
-                          {tracks.map((t) => (
-                            <div
-                              key={t.id}
-                              className={`p-2 border-b cursor-pointer text-[11px] ${
-                                currentTrack.id === t.id ? 'bg-[#000080] text-white font-bold' : 'hover:bg-gray-100'
-                              }`}
-                              onClick={() => setCurrentTrack(t)}
-                            >
-                              <div className="truncate">{t.artist}</div>
-                              <div className="truncate opacity-90">{t.title}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Right: Custom visual player */}
-                      <div className="flex-1 flex flex-col justify-between">
-                        <div className="win2k-border-inset p-2 bg-[#f1f1f1] overflow-hidden h-[320px]">
-                          <div className="flex h-full flex-col">
-                            <div className="mb-2 border-b border-gray-300 pb-2 flex items-center gap-3">
-                              {/* Cover Art */}
-                              {currentTrack.coverUrl ? (
-                                <div className="w-12 h-12 flex-shrink-0 border border-gray-400 bg-black overflow-hidden">
-                                  <img src={currentTrack.coverUrl} alt="cover" className="w-full h-full object-cover" />
-                                </div>
-                              ) : (
-                                <div className="w-12 h-12 flex-shrink-0 border border-gray-400 bg-[#0f1021] flex items-center justify-center">
-                                  <svg viewBox="0 0 24 24" className="w-6 h-6 text-blue-400" fill="currentColor">
-                                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                                    <circle cx="12" cy="12" r="4" />
-                                    <circle cx="12" cy="12" r="1.5" fill="#0f1021" />
-                                  </svg>
-                                </div>
-                              )}
-                              <div>
-                                <div className="text-[10px] uppercase tracking-[0.2em] text-gray-600">Now playing</div>
-                                <div className="text-[12px] font-bold text-blue-900">{currentTrack.title}</div>
-                                <div className="text-[11px] text-gray-700">{currentTrack.artist} · {currentTrack.genre}</div>
-                              </div>
-                            </div>
-
-                            <div className="mb-2 rounded-sm border border-gray-400 bg-[#0f1021] p-3">
-                              <div className="flex items-center justify-between">
-                                <div className="text-[10px] uppercase tracking-[0.2em] text-[#8cb6ff]">Reactive visualizer</div>
-                                <div className="text-[10px] text-[#cfe1ff]">{isPlaying ? 'Playing' : 'Paused'}</div>
-                              </div>
-                              <div className="wmp-battery-shell mt-3 p-3">
-                                <div className="wmp-battery-tip" />
-                                <div className="wmp-battery-grid">
-                                  {visualizerBars.map((height, index) => {
-                                    const level = Math.round((height / 54) * 100);
-                                    const fillColor = level > 66 ? '#6df16d' : level > 33 ? '#f4e651' : '#ff6262';
-                                    return (
-                                      <div key={index} className="wmp-battery-cell">
-                                        <div
-                                          className="wmp-battery-cell-fill"
-                                          style={{ height: `${height}px`, background: `linear-gradient(to top, ${fillColor}, #0f3969)` }}
-                                        />
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                              <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="flex gap-2">
-                                  <button className="win2k-btn px-2 py-0.5 text-[10px]" onClick={togglePlayback}>
-                                    {isPlaying ? 'Pause' : 'Play'}
-                                  </button>
-                                  <button className="win2k-btn px-2 py-0.5 text-[10px]" onClick={stopPlayback}>
-                                    Stop
-                                  </button>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <label className="text-[10px] uppercase tracking-[0.15em] text-gray-600">Volume</label>
-                                  <input
-                                    type="range"
-                                    min="0"
-                                    max="1"
-                                    step="0.01"
-                                    value={volume}
-                                    onChange={(event) => setVolume(Number(event.target.value))}
-                                    className="h-2 w-24 accent-blue-900"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex-1 min-h-0 overflow-hidden rounded-sm border border-gray-400 bg-black p-3 text-[11px] text-gray-200">
-                              <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-[#8cb6ff]">
-                                <span>Native audio player</span>
-                                <span>{currentTime > 0 ? `${Math.floor(currentTime / 60)}:${String(Math.floor(currentTime % 60)).padStart(2, '0')}` : '00:00'}/{duration > 0 ? `${Math.floor(duration / 60)}:${String(Math.floor(duration % 60)).padStart(2, '0')}` : '00:00'}</span>
-                              </div>
-                              {currentTrack.audioUrl ? (
-                                <>
-                                  <div className="mb-2 text-[11px] text-gray-300">
-                                    Direct stream ready for this track.
-                                  </div>
-                                  <audio
-                                    ref={audioRef}
-                                    key={currentTrack.id}
-                                    src={currentTrack.audioUrl}
-                                    preload="metadata"
-                                    onLoadedMetadata={handleMetadataLoaded}
-                                    onTimeUpdate={handleTimeUpdate}
-                                    onPause={() => setIsPlaying(false)}
-                                    onPlay={() => setIsPlaying(true)}
-                                    onEnded={() => {
-                                      setIsPlaying(false);
-                                      setCurrentTime(0);
-                                      stopVisualizer();
-                                    }}
-                                  />
-                                </>
-                              ) : (
-                                <div className="flex h-full items-center justify-center text-center text-gray-400">
-                                  <div>
-                                    <div className="font-bold text-white">Direct audio source needed</div>
-                                    <div className="mt-1">The native player is ready; add a direct MP3/M4A stream URL to enable playback.</div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="mt-2 flex items-center justify-between text-[10px] text-gray-600">
-                              <span>Audio source • HTML5</span>
-                              <a
-                                href={currentTrack.audioUrl || (TRACK_SLUG_MAP[currentTrack.id] ? `https://soundcloud.com/uloee/${TRACK_SLUG_MAP[currentTrack.id]}` : 'https://soundcloud.com/uloee')}
-                                className="font-bold text-blue-900 underline"
-                                target="_blank"
-                                rel="noopener noreferrer"
+                      
+                      {/* Left: Tracks Playlist (Hidden when visualizer is expanded to full window) */}
+                      {!isVisualizerExpanded && (
+                        <div className="w-full md:w-2/5 flex flex-col gap-2 border-r pr-3 select-none">
+                          <div className="font-bold text-blue-900 border-b pb-1 mb-1 flex items-center justify-between text-[11px]">
+                            <span>Now Playing</span>
+                            <span className="text-[10px] text-gray-500 font-mono font-normal">{tracks.length} Track(s)</span>
+                          </div>
+                          <div className="flex-1 overflow-y-auto max-h-[300px] pr-1 win2k-scroll">
+                            {tracks.map((t) => (
+                              <div
+                                key={t.id}
+                                className={`p-2 border-b cursor-pointer text-[11px] rounded-sm transition-colors ${
+                                  currentTrack.id === t.id ? 'bg-[#000080] text-white font-bold' : 'hover:bg-gray-100'
+                                }`}
+                                onClick={() => setCurrentTrack(t)}
                               >
-                                {currentTrack.audioUrl ? 'Open local file' : 'Open track'}
-                              </a>
-                            </div>
+                                <div className="truncate">{t.artist}</div>
+                                <div className="truncate opacity-90">{t.title}</div>
+                              </div>
+                            ))}
                           </div>
                         </div>
-                        <div className="mt-3 flex gap-2 justify-end">
-                          <a href="https://soundcloud.com/uloee" target="_blank" rel="noopener noreferrer" className="win2k-btn bg-orange-100 font-bold border-orange-500">
-                            SoundCloud Profile
-                          </a>
+                      )}
+
+                      {/* Right: Custom visual player with Canvas Visualizer */}
+                      <div className="flex-1 flex flex-col justify-between h-full">
+                        <div className="win2k-border-inset p-2 bg-[#f1f1f1] overflow-hidden flex flex-col gap-2 h-full">
+                          
+                          {/* Track Header Details (hidden in full window for maximum visualizer space) */}
+                          {!isVisualizerExpanded && (
+                            <div className="border-b border-gray-300 pb-1.5 flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                {currentTrack.coverUrl ? (
+                                  <div className="w-10 h-10 flex-shrink-0 border border-gray-400 bg-black overflow-hidden rounded-sm">
+                                    <img src={currentTrack.coverUrl} alt="cover" className="w-full h-full object-cover" />
+                                  </div>
+                                ) : (
+                                  <div className="w-10 h-10 flex-shrink-0 border border-gray-400 bg-[#0f1021] flex items-center justify-center rounded-sm">
+                                    <svg viewBox="0 0 24 24" className="w-5 h-5 text-cyan-400 animate-pulse" fill="currentColor">
+                                      <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                                      <circle cx="12" cy="12" r="4" />
+                                      <circle cx="12" cy="12" r="1.5" fill="#0f1021" />
+                                    </svg>
+                                  </div>
+                                )}
+                                <div>
+                                  <div className="text-[9px] uppercase tracking-[0.2em] text-gray-500 font-mono">Now Playing</div>
+                                  <div className="text-[12px] font-bold text-blue-950 truncate max-w-[240px]">{currentTrack.title}</div>
+                                  <div className="text-[10px] text-gray-600 truncate">{currentTrack.artist} · <span className="font-mono text-blue-800">{currentTrack.genre}</span></div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Multi-Preset Canvas Visualizer (Full height when expanded) */}
+                          <div className={`w-full ${isVisualizerExpanded ? 'h-[295px]' : 'h-[210px]'}`}>
+                            <AudioVisualizer
+                              analyserNode={analyserRef.current}
+                              isPlaying={isPlaying}
+                              activePresetId={visualizerPreset}
+                              onPresetChange={setVisualizerPreset}
+                              isExpanded={isVisualizerExpanded}
+                              onToggleExpand={() => setIsVisualizerExpanded(!isVisualizerExpanded)}
+                            />
+                          </div>
+
+                          {/* Time scrub timeline & controls */}
+                          <div className="flex flex-col gap-1.5 bg-[#e4e4dc] p-2 border border-gray-400 rounded-sm">
+                            {/* Seek bar */}
+                            <div className="flex items-center gap-2 text-[10px] font-mono text-gray-800">
+                              <span>
+                                {currentTime > 0 ? `${Math.floor(currentTime / 60)}:${String(Math.floor(currentTime % 60)).padStart(2, '0')}` : '00:00'}
+                              </span>
+                              <input
+                                type="range"
+                                min="0"
+                                max={duration || 100}
+                                step="0.1"
+                                value={currentTime}
+                                onChange={(e) => handleSeek(Number(e.target.value))}
+                                className="flex-1 h-1.5 accent-blue-900 cursor-pointer"
+                              />
+                              <span>
+                                {duration > 0 ? `${Math.floor(duration / 60)}:${String(Math.floor(duration % 60)).padStart(2, '0')}` : '00:00'}
+                              </span>
+                            </div>
+
+                            {/* Playback Buttons & Volume */}
+                            <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-gray-300">
+                              <div className="flex items-center gap-1">
+                                <button
+                                  className="win2k-btn px-2 py-0.5 text-[10px] font-bold cursor-pointer"
+                                  onClick={playPrevTrack}
+                                  title="Previous Track"
+                                >
+                                  |&lt;&lt;
+                                </button>
+                                <button
+                                  className="win2k-btn px-3 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-950 cursor-pointer"
+                                  onClick={togglePlayback}
+                                >
+                                  {isPlaying ? 'Pause ⏸' : 'Play ▶'}
+                                </button>
+                                <button
+                                  className="win2k-btn px-2.5 py-0.5 text-[10px] font-bold cursor-pointer"
+                                  onClick={stopPlayback}
+                                >
+                                  Stop ■
+                                </button>
+                                <button
+                                  className="win2k-btn px-2 py-0.5 text-[10px] font-bold cursor-pointer"
+                                  onClick={playNextTrack}
+                                  title="Next Track"
+                                >
+                                  &gt;&gt;|
+                                </button>
+                              </div>
+
+                              {/* Volume control */}
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-mono uppercase text-gray-700">Vol:</span>
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="1"
+                                  step="0.01"
+                                  value={volume}
+                                  onChange={(event) => setVolume(Number(event.target.value))}
+                                  className="h-1.5 w-16 accent-blue-900 cursor-pointer"
+                                />
+                                <span className="text-[9px] font-mono text-gray-600 w-6 text-right">
+                                  {Math.round(volume * 100)}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Hidden HTML5 Audio Element */}
+                          {currentTrack.audioUrl && (
+                            <audio
+                              ref={audioRef}
+                              key={currentTrack.id}
+                              src={currentTrack.audioUrl}
+                              preload="metadata"
+                              onLoadedMetadata={handleMetadataLoaded}
+                              onTimeUpdate={handleTimeUpdate}
+                              onPause={() => setIsPlaying(false)}
+                              onPlay={() => setIsPlaying(true)}
+                              onEnded={() => {
+                                setIsPlaying(false);
+                                playNextTrack();
+                              }}
+                            />
+                          )}
+
                         </div>
                       </div>
                     </div>
