@@ -1005,99 +1005,238 @@ export default function Home() {
                     </div>
                   )}
 
-                  {/* Internet Explorer */}
+                  {/* Internet Explorer — Y2K Cybercore Brutalist Links */}
                   {win.id === 'links' && (
-                    <div className="flex flex-col h-full bg-[#f1f1f1]">
-                      {/* IE top panel */}
-                      <div className="bg-[#d0d0c8] p-2 border-b flex flex-col gap-1.5">
-                        <div className="flex gap-2">
-                          <button className="win2k-btn px-1.5 py-0.5 text-[10px]" onClick={() => alert("Back navigation simulation")}>&lt; Back</button>
-                          <button className="win2k-btn px-1.5 py-0.5 text-[10px]" onClick={() => alert("Forward navigation simulation")}>Forward &gt;</button>
-                          <div className="flex-1 flex items-center gap-1">
-                            <span className="text-[11px] font-sans">Address:</span>
-                            <div className="flex-1 bg-white border border-gray-400 font-mono text-[11px] px-2 py-0.5">
-                              http://www.chromeheaven.com/links
-                            </div>
-                          </div>
+                    <div className="flex flex-col h-full" style={{ background: '#0a0a0a' }}>
+                      {/* IE nav bar */}
+                      <div className="bg-[#d0d0c8] p-1.5 border-b border-black flex gap-1.5 items-center flex-shrink-0">
+                        <button className="win2k-btn px-1.5 py-0.5 text-[10px]">&lt; Back</button>
+                        <button className="win2k-btn px-1.5 py-0.5 text-[10px]">Fwd &gt;</button>
+                        <div className="flex-1 bg-white border border-gray-500 font-mono text-[10px] px-2 py-0.5 text-gray-700 truncate">
+                          http://chromeheaven.com/links.exe
                         </div>
+                        <div className="text-[10px] font-mono text-gray-600 animate-pulse">●&nbsp;ONLINE</div>
                       </div>
 
-                      {/* Simulated web content */}
-                      <div className="flex-1 bg-[#2b4c7e] p-6 overflow-y-auto text-white font-sans text-center">
-                        <div className="max-w-md mx-auto bg-[#d0d0c8] border-2 border-white border-r-[#404040] border-bottom-[#404040] p-4 text-black text-left shadow-lg">
-                          <div className="bg-gradient-to-r from-blue-900 to-blue-400 text-white font-bold p-1 text-[11px] mb-3">
-                            Internet Explorer Web Portal
-                          </div>
-                          
-                          <div className="flex items-center gap-4 mb-4 border-b pb-3">
-                            <Image
-                              src="/images/avatar.png"
-                              alt="Uloe avatar"
-                              width={48}
-                              height={48}
-                              className="rounded-full border"
-                            />
-                            <div>
-                              <h2 className="font-display font-bold text-base leading-tight">Chrome Heaven Portal</h2>
-                              <p className="text-xs text-gray-500 font-jp">影が届くまで</p>
+                      {/* Main content area */}
+                      <div
+                        className="flex-1 overflow-y-auto win2k-scroll p-3 select-text"
+                        style={{
+                          background: '#080808',
+                          backgroundImage: `
+                            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,0,0.02) 2px, rgba(0,255,0,0.02) 4px),
+                            repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,255,255,0.01) 4px, rgba(0,255,255,0.01) 8px)
+                          `,
+                        }}
+                      >
+                        {/* Dither header banner */}
+                        <div
+                          className="mb-3 p-3 relative overflow-hidden border border-[#00ff41]"
+                          style={{
+                            background: 'repeating-linear-gradient(45deg, #000 0px, #000 2px, #001100 2px, #001100 4px)',
+                          }}
+                        >
+                          {/* Scanline overlay */}
+                          <div className="absolute inset-0 pointer-events-none" style={{
+                            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.4) 1px, rgba(0,0,0,0.4) 2px)',
+                          }} />
+                          <div className="relative">
+                            <div className="font-mono text-[9px] text-[#00ff41] tracking-widest uppercase mb-0.5 opacity-70">
+                              ▓▓ CHROME_HEAVEN.COM ▓▓ LINK_DIRECTORY_v2.0
+                            </div>
+                            <div
+                              className="font-mono font-bold text-[13px] text-[#00ffff] tracking-[0.2em] uppercase"
+                              style={{ textShadow: '0 0 8px #00ffff, 2px 0 0 #ff00ff, -2px 0 0 #ffff00' }}
+                            >
+                              PORTALS &amp; NETWORKS
+                            </div>
+                            <div className="font-mono text-[9px] text-[#ff00ff] opacity-60 mt-0.5 tracking-wider">
+                              影が届くまで · TILL_I_DIE · ULOE · {new Date().getFullYear()}
                             </div>
                           </div>
+                        </div>
 
-                          <p className="text-[11px] mb-4 text-gray-700">
-                            Click any destination below to access official profiles and streaming:
-                          </p>
+                        {/* Dither separator */}
+                        <div className="h-px mb-3" style={{
+                          background: 'repeating-linear-gradient(90deg, #ff00ff 0px, #ff00ff 2px, transparent 2px, transparent 4px, #00ffff 4px, #00ffff 6px, transparent 6px, transparent 8px)'
+                        }} />
 
-                          <div className="flex flex-col gap-2">
-                            <a
-                              href="https://soundcloud.com/uloee"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block p-2 bg-orange-100 hover:bg-orange-200 border-2 border-white border-r-orange-600 border-b-orange-600 text-orange-950 font-bold text-center text-xs"
-                            >
-                              SoundCloud Profile (uloee)
-                            </a>
-                            <a
-                              href="https://bandcamp.com"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block p-2 bg-teal-100 hover:bg-teal-200 border-2 border-white border-r-teal-600 border-b-teal-600 text-teal-950 font-bold text-center text-xs"
-                            >
-                              Bandcamp
-                            </a>
-                            <a
-                              href="https://instagram.com"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block p-2 bg-pink-100 hover:bg-pink-200 border-2 border-white border-r-pink-600 border-b-pink-600 text-pink-950 font-bold text-center text-xs"
-                            >
-                              Instagram
-                            </a>
-                            <a
-                              href="https://chromeheaven.tumblr.com"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block p-2 bg-blue-100 hover:bg-blue-200 border-2 border-white border-r-blue-600 border-b-blue-600 text-blue-950 font-bold text-center text-xs"
-                            >
-                              Tumblr Blog
-                            </a>
-                            <a
-                              href="https://youtube.com"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block p-2 bg-red-100 hover:bg-red-200 border-2 border-white border-r-red-600 border-b-red-600 text-red-950 font-bold text-center text-xs"
-                            >
-                              YouTube
-                            </a>
-                            <a
-                              href="https://tiktok.com"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block p-2 bg-violet-100 hover:bg-violet-200 border-2 border-white border-r-violet-600 border-b-violet-600 text-violet-950 font-bold text-center text-xs"
-                            >
-                              TikTok
-                            </a>
+                        {/* Link grid — cybercore brutalist cards */}
+                        <div className="flex flex-col gap-2">
+
+                          {/* SoundCloud */}
+                          <a
+                            href="https://soundcloud.com/uloee"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ch-link-card group block relative overflow-hidden"
+                            style={{
+                              background: 'repeating-linear-gradient(45deg, #1a0800 0px, #1a0800 2px, #200a00 2px, #200a00 4px)',
+                              border: '1px solid #ff4500',
+                              padding: '8px 10px',
+                            }}
+                          >
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-75 pointer-events-none" style={{ background: 'repeating-linear-gradient(90deg, rgba(255,69,0,0.08) 0px, transparent 1px)' }} />
+                            <div className="flex items-center gap-3 relative">
+                              <div className="font-mono text-[18px] leading-none flex-shrink-0" style={{ color: '#ff4500', textShadow: '0 0 6px #ff4500, 2px 0 0 #ff8800' }}>▶</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-mono font-bold text-[11px] tracking-widest uppercase" style={{ color: '#ff6622', textShadow: '0 0 4px #ff4500' }}>
+                                  SoundCloud
+                                </div>
+                                <div className="font-mono text-[9px] opacity-60 tracking-wider" style={{ color: '#ff8844' }}>
+                                  /uloee · stream &amp; follow
+                                </div>
+                              </div>
+                              <div className="font-mono text-[9px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#ff4500' }}>[ ENTER ]</div>
+                            </div>
+                          </a>
+
+                          {/* Bandcamp */}
+                          <a
+                            href="https://bandcamp.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ch-link-card group block relative overflow-hidden"
+                            style={{
+                              background: 'repeating-linear-gradient(45deg, #001108 0px, #001108 2px, #001a0a 2px, #001a0a 4px)',
+                              border: '1px solid #1da462',
+                              padding: '8px 10px',
+                            }}
+                          >
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-75 pointer-events-none" style={{ background: 'repeating-linear-gradient(90deg, rgba(29,164,98,0.08) 0px, transparent 1px)' }} />
+                            <div className="flex items-center gap-3 relative">
+                              <div className="font-mono text-[18px] leading-none flex-shrink-0" style={{ color: '#1da462', textShadow: '0 0 6px #1da462' }}>▶</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-mono font-bold text-[11px] tracking-widest uppercase" style={{ color: '#1da462', textShadow: '0 0 4px #00ff80' }}>
+                                  Bandcamp
+                                </div>
+                                <div className="font-mono text-[9px] opacity-60 tracking-wider" style={{ color: '#33cc77' }}>
+                                  · buy &amp; download releases
+                                </div>
+                              </div>
+                              <div className="font-mono text-[9px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#1da462' }}>[ ENTER ]</div>
+                            </div>
+                          </a>
+
+                          {/* Instagram */}
+                          <a
+                            href="https://instagram.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ch-link-card group block relative overflow-hidden"
+                            style={{
+                              background: 'repeating-linear-gradient(45deg, #100010 0px, #100010 2px, #160016 2px, #160016 4px)',
+                              border: '1px solid #e1306c',
+                              padding: '8px 10px',
+                            }}
+                          >
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-75 pointer-events-none" style={{ background: 'repeating-linear-gradient(90deg, rgba(225,48,108,0.08) 0px, transparent 1px)' }} />
+                            <div className="flex items-center gap-3 relative">
+                              <div className="font-mono text-[18px] leading-none flex-shrink-0" style={{ color: '#e1306c', textShadow: '0 0 6px #e1306c, 2px 0 0 #833ab4' }}>▶</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-mono font-bold text-[11px] tracking-widest uppercase" style={{ color: '#e1306c', textShadow: '0 0 4px #ff0066' }}>
+                                  Instagram
+                                </div>
+                                <div className="font-mono text-[9px] opacity-60 tracking-wider" style={{ color: '#c13584' }}>
+                                  · visuals &amp; edits
+                                </div>
+                              </div>
+                              <div className="font-mono text-[9px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#e1306c' }}>[ ENTER ]</div>
+                            </div>
+                          </a>
+
+                          {/* Tumblr */}
+                          <a
+                            href="https://chromeheaven.tumblr.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ch-link-card group block relative overflow-hidden"
+                            style={{
+                              background: 'repeating-linear-gradient(45deg, #000814 0px, #000814 2px, #000c1c 2px, #000c1c 4px)',
+                              border: '1px solid #35465c',
+                              padding: '8px 10px',
+                            }}
+                          >
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-75 pointer-events-none" style={{ background: 'repeating-linear-gradient(90deg, rgba(0,180,255,0.08) 0px, transparent 1px)' }} />
+                            <div className="flex items-center gap-3 relative">
+                              <div className="font-mono text-[18px] leading-none flex-shrink-0" style={{ color: '#00b4ff', textShadow: '0 0 6px #00b4ff' }}>▶</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-mono font-bold text-[11px] tracking-widest uppercase" style={{ color: '#36aeee', textShadow: '0 0 4px #00b4ff' }}>
+                                  Tumblr
+                                </div>
+                                <div className="font-mono text-[9px] opacity-60 tracking-wider" style={{ color: '#5bb8e8' }}>
+                                  /chromeheaven · blog &amp; art
+                                </div>
+                              </div>
+                              <div className="font-mono text-[9px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#36aeee' }}>[ ENTER ]</div>
+                            </div>
+                          </a>
+
+                          {/* YouTube */}
+                          <a
+                            href="https://youtube.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ch-link-card group block relative overflow-hidden"
+                            style={{
+                              background: 'repeating-linear-gradient(45deg, #0f0000 0px, #0f0000 2px, #1a0000 2px, #1a0000 4px)',
+                              border: '1px solid #ff0000',
+                              padding: '8px 10px',
+                            }}
+                          >
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-75 pointer-events-none" style={{ background: 'repeating-linear-gradient(90deg, rgba(255,0,0,0.08) 0px, transparent 1px)' }} />
+                            <div className="flex items-center gap-3 relative">
+                              <div className="font-mono text-[18px] leading-none flex-shrink-0" style={{ color: '#ff0000', textShadow: '0 0 6px #ff0000' }}>▶</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-mono font-bold text-[11px] tracking-widest uppercase" style={{ color: '#ff3333', textShadow: '0 0 4px #ff0000' }}>
+                                  YouTube
+                                </div>
+                                <div className="font-mono text-[9px] opacity-60 tracking-wider" style={{ color: '#ff6666' }}>
+                                  · video &amp; sessions
+                                </div>
+                              </div>
+                              <div className="font-mono text-[9px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#ff0000' }}>[ ENTER ]</div>
+                            </div>
+                          </a>
+
+                          {/* TikTok */}
+                          <a
+                            href="https://tiktok.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ch-link-card group block relative overflow-hidden"
+                            style={{
+                              background: 'repeating-linear-gradient(45deg, #000a10 0px, #000a10 2px, #001018 2px, #001018 4px)',
+                              border: '1px solid #00f2ea',
+                              padding: '8px 10px',
+                            }}
+                          >
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-75 pointer-events-none" style={{ background: 'repeating-linear-gradient(90deg, rgba(0,242,234,0.08) 0px, transparent 1px)' }} />
+                            <div className="flex items-center gap-3 relative">
+                              <div className="font-mono text-[18px] leading-none flex-shrink-0" style={{ color: '#00f2ea', textShadow: '0 0 6px #00f2ea, 2px 0 0 #ff0050' }}>▶</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-mono font-bold text-[11px] tracking-widest uppercase" style={{ color: '#00f2ea', textShadow: '0 0 4px #00f2ea' }}>
+                                  TikTok
+                                </div>
+                                <div className="font-mono text-[9px] opacity-60 tracking-wider" style={{ color: '#66f7f2' }}>
+                                  · short form &amp; clips
+                                </div>
+                              </div>
+                              <div className="font-mono text-[9px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#00f2ea' }}>[ ENTER ]</div>
+                            </div>
+                          </a>
+
+                        </div>
+
+                        {/* Dither footer */}
+                        <div className="mt-3 pt-2" style={{
+                          borderTop: '1px solid rgba(0,255,65,0.2)',
+                        }}>
+                          <div className="font-mono text-[8px] tracking-widest text-center" style={{ color: 'rgba(0,255,65,0.3)' }}>
+                            ▓▓▒▒░░ CHROME_HEAVEN · NETWORK_PORTALS · {new Date().getFullYear()} ░░▒▒▓▓
                           </div>
                         </div>
+
                       </div>
                     </div>
                   )}

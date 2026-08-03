@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { 
         success: false, 
-        message: 'Writing content is only supported during local development (npm run dev). in production, data changes are simulated in the browser session.' 
+        message: 'Writing content is only supported during local development (npm run dev). In production, data changes must be committed to the repository.' 
       },
       { status: 403 }
     );
@@ -36,6 +36,9 @@ export async function POST(request: Request) {
       // If content.json doesn't exist, we'll start with empty and write it
     }
 
+    // ─────────────────────────────────────────────────────────
+    // CREATE: Upload Track
+    // ─────────────────────────────────────────────────────────
     if (action === 'upload_track') {
       const title = formData.get('title') as string;
       const artist = formData.get('artist') as string;
@@ -88,6 +91,70 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, track: newTrack, db: dbContent });
     } 
     
+    // ─────────────────────────────────────────────────────────
+    // UPDATE: Edit Track metadata
+    // ─────────────────────────────────────────────────────────
+    else if (action === 'update_track') {
+      const id = formData.get('id') as string;
+      const title = formData.get('title') as string;
+      const artist = formData.get('artist') as string;
+      const genre = formData.get('genre') as string;
+
+      if (!id) {
+        return NextResponse.json({ success: false, message: 'Missing track id' }, { status: 400 });
+      }
+
+      const idx = dbContent.tracks.findIndex((t: any) => t.id === id);
+      if (idx === -1) {
+        return NextResponse.json({ success: false, message: 'Track not found' }, { status: 404 });
+      }
+
+      dbContent.tracks[idx] = {
+        ...dbContent.tracks[idx],
+        ...(title ? { title } : {}),
+        ...(artist ? { artist } : {}),
+        ...(genre ? { genre } : {})
+      };
+
+      await fs.writeFile(dbPath, JSON.stringify(dbContent, null, 2), 'utf-8');
+      return NextResponse.json({ success: true, db: dbContent });
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // DELETE: Remove Track
+    // ─────────────────────────────────────────────────────────
+    else if (action === 'delete_track') {
+      const id = formData.get('id') as string;
+      if (!id) {
+        return NextResponse.json({ success: false, message: 'Missing track id' }, { status: 400 });
+      }
+
+      const track = dbContent.tracks.find((t: any) => t.id === id);
+      if (!track) {
+        return NextResponse.json({ success: false, message: 'Track not found' }, { status: 404 });
+      }
+
+      // Remove from db
+      dbContent.tracks = dbContent.tracks.filter((t: any) => t.id !== id);
+      await fs.writeFile(dbPath, JSON.stringify(dbContent, null, 2), 'utf-8');
+
+      // Optionally delete the audio file (only if it's inside /public/audio and not used by other tracks)
+      if (track.audioUrl && track.audioUrl.startsWith('/audio/')) {
+        const audioFilename = track.audioUrl.replace('/audio/', '');
+        const stillUsed = dbContent.tracks.some((t: any) => t.audioUrl === track.audioUrl);
+        if (!stillUsed) {
+          try {
+            await fs.unlink(path.join(process.cwd(), 'public', 'audio', audioFilename));
+          } catch (_) { /* File may not exist, ignore */ }
+        }
+      }
+
+      return NextResponse.json({ success: true, db: dbContent });
+    }
+    
+    // ─────────────────────────────────────────────────────────
+    // CREATE: Upload Image/Visual
+    // ─────────────────────────────────────────────────────────
     else if (action === 'upload_image') {
       const name = formData.get('name') as string;
       const tag = formData.get('tag') as string;
@@ -127,8 +194,71 @@ export async function POST(request: Request) {
       await fs.writeFile(dbPath, JSON.stringify(dbContent, null, 2), 'utf-8');
 
       return NextResponse.json({ success: true, image: newImage, db: dbContent });
-    } 
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // UPDATE: Edit Gallery Item metadata
+    // ─────────────────────────────────────────────────────────
+    else if (action === 'update_image') {
+      const id = formData.get('id') as string;
+      const name = formData.get('name') as string;
+      const tag = formData.get('tag') as string;
+      const description = formData.get('description') as string;
+
+      if (!id) {
+        return NextResponse.json({ success: false, message: 'Missing image id' }, { status: 400 });
+      }
+
+      const idx = dbContent.gallery.findIndex((g: any) => g.id === id);
+      if (idx === -1) {
+        return NextResponse.json({ success: false, message: 'Gallery item not found' }, { status: 404 });
+      }
+
+      dbContent.gallery[idx] = {
+        ...dbContent.gallery[idx],
+        ...(name ? { name } : {}),
+        ...(tag ? { tag } : {}),
+        description: description || ''
+      };
+
+      await fs.writeFile(dbPath, JSON.stringify(dbContent, null, 2), 'utf-8');
+      return NextResponse.json({ success: true, db: dbContent });
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // DELETE: Remove Gallery Item
+    // ─────────────────────────────────────────────────────────
+    else if (action === 'delete_image') {
+      const id = formData.get('id') as string;
+      if (!id) {
+        return NextResponse.json({ success: false, message: 'Missing image id' }, { status: 400 });
+      }
+
+      const item = dbContent.gallery.find((g: any) => g.id === id);
+      if (!item) {
+        return NextResponse.json({ success: false, message: 'Gallery item not found' }, { status: 404 });
+      }
+
+      dbContent.gallery = dbContent.gallery.filter((g: any) => g.id !== id);
+      await fs.writeFile(dbPath, JSON.stringify(dbContent, null, 2), 'utf-8');
+
+      // Optionally delete the file
+      if (item.src) {
+        const relativePath = item.src.startsWith('/') ? item.src.slice(1) : item.src;
+        const stillUsed = dbContent.gallery.some((g: any) => g.src === item.src);
+        if (!stillUsed) {
+          try {
+            await fs.unlink(path.join(process.cwd(), 'public', relativePath));
+          } catch (_) { /* ignore */ }
+        }
+      }
+
+      return NextResponse.json({ success: true, db: dbContent });
+    }
     
+    // ─────────────────────────────────────────────────────────
+    // CREATE: New Blog Post
+    // ─────────────────────────────────────────────────────────
     else if (action === 'create_post') {
       const title = formData.get('title') as string;
       const date = formData.get('date') as string;
@@ -150,10 +280,63 @@ export async function POST(request: Request) {
         audioSrc: audioSrc || ''
       };
 
-      dbContent.posts.unshift(newPost); // Add new posts to the beginning
+      dbContent.posts.unshift(newPost);
       await fs.writeFile(dbPath, JSON.stringify(dbContent, null, 2), 'utf-8');
 
       return NextResponse.json({ success: true, post: newPost, db: dbContent });
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // UPDATE: Edit Blog Post
+    // ─────────────────────────────────────────────────────────
+    else if (action === 'update_post') {
+      const id = formData.get('id') as string;
+      const title = formData.get('title') as string;
+      const date = formData.get('date') as string;
+      const content = formData.get('content') as string;
+      const imageSrc = formData.get('imageSrc') as string;
+      const audioSrc = formData.get('audioSrc') as string;
+
+      if (!id) {
+        return NextResponse.json({ success: false, message: 'Missing post id' }, { status: 400 });
+      }
+
+      const idx = dbContent.posts.findIndex((p: any) => p.id === id);
+      if (idx === -1) {
+        return NextResponse.json({ success: false, message: 'Post not found' }, { status: 404 });
+      }
+
+      dbContent.posts[idx] = {
+        ...dbContent.posts[idx],
+        ...(title ? { title } : {}),
+        ...(date ? { date } : {}),
+        ...(content ? { content } : {}),
+        imageSrc: imageSrc ?? dbContent.posts[idx].imageSrc,
+        audioSrc: audioSrc ?? dbContent.posts[idx].audioSrc,
+      };
+
+      await fs.writeFile(dbPath, JSON.stringify(dbContent, null, 2), 'utf-8');
+      return NextResponse.json({ success: true, db: dbContent });
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // DELETE: Remove Blog Post
+    // ─────────────────────────────────────────────────────────
+    else if (action === 'delete_post') {
+      const id = formData.get('id') as string;
+      if (!id) {
+        return NextResponse.json({ success: false, message: 'Missing post id' }, { status: 400 });
+      }
+
+      const exists = dbContent.posts.some((p: any) => p.id === id);
+      if (!exists) {
+        return NextResponse.json({ success: false, message: 'Post not found' }, { status: 404 });
+      }
+
+      dbContent.posts = dbContent.posts.filter((p: any) => p.id !== id);
+      await fs.writeFile(dbPath, JSON.stringify(dbContent, null, 2), 'utf-8');
+
+      return NextResponse.json({ success: true, db: dbContent });
     }
 
     return NextResponse.json({ success: false, message: 'Invalid action' }, { status: 400 });
