@@ -30,12 +30,49 @@
     }
   ],
   "gallery": [
-    { "id": "g1", "name": "paris_2023.bmp", "src": "/images/gallery_1.png", "tag": "Paris2023" },
-    { "id": "g2", "name": "lost_in_fantasy.bmp", "src": "/images/gallery_2.png", "tag": "lost-in-a-fantasy" },
-    { "id": "g3", "name": "how_to_start_cult.bmp", "src": "/images/gallery_3.png", "tag": "how-2-start-a-cult" },
-    { "id": "g4", "name": "nothin_2_say.bmp", "src": "/images/gallery_4.png", "tag": "nothin-2-say" },
-    { "id": "g5", "name": "malice_cover.bmp", "src": "/images/malice_ep_cover.png", "tag": "malice" },
-    { "id": "g6", "name": "avatar_uloe.bmp", "src": "/images/avatar.png", "tag": "uloee" }
+    {
+      "id": "g1",
+      "name": "paris_2023.bmp",
+      "src": "/images/gallery_1.png",
+      "tag": "Paris2023"
+    },
+    {
+      "id": "g2",
+      "name": "lost_in_fantasy.bmp",
+      "src": "/images/gallery_2.png",
+      "tag": "lost-in-a-fantasy"
+    },
+    {
+      "id": "g3",
+      "name": "how_to_start_cult.bmp",
+      "src": "/images/gallery_3.png",
+      "tag": "how-2-start-a-cult"
+    },
+    {
+      "id": "g4",
+      "name": "nothin_2_say.bmp",
+      "src": "/images/gallery_4.png",
+      "tag": "nothin-2-say"
+    },
+    {
+      "id": "g5",
+      "name": "malice_cover.bmp",
+      "src": "/images/malice_ep_cover.png",
+      "tag": "malice"
+    },
+    {
+      "id": "g6",
+      "name": "avatar_uloe.bmp",
+      "src": "/images/avatar.png",
+      "tag": "uloee"
+    },
+    {
+      "id": "g_49c063d1-581f-45f6-8222-d624965fc247_1784131986182",
+      "name": "hands",
+      "src": "/images/49C063D1-581F-45F6-8222-D624965FC247.JPEG",
+      "tag": "edit",
+      "type": "image"
+    }
   ],
   "posts": [
     {
