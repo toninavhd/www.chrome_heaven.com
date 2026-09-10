@@ -155,6 +155,28 @@ export async function POST(request: Request) {
 
       return NextResponse.json({ success: true, post: newPost, db: dbContent });
     }
+    
+    else if (action === 'delete_item') {
+      const type = formData.get('type') as string;
+      const id = formData.get('id') as string;
+
+      if (!type || !id) {
+        return NextResponse.json({ success: false, message: 'Missing type or id' }, { status: 400 });
+      }
+
+      if (type === 'tracks') {
+        dbContent.tracks = dbContent.tracks.filter(t => t.id !== id);
+      } else if (type === 'gallery') {
+        dbContent.gallery = dbContent.gallery.filter(g => g.id !== id);
+      } else if (type === 'posts') {
+        dbContent.posts = dbContent.posts.filter(p => p.id !== id);
+      } else {
+        return NextResponse.json({ success: false, message: 'Invalid type' }, { status: 400 });
+      }
+
+      await fs.writeFile(dbPath, JSON.stringify(dbContent, null, 2), 'utf-8');
+      return NextResponse.json({ success: true, db: dbContent });
+    }
 
     return NextResponse.json({ success: false, message: 'Invalid action' }, { status: 400 });
   } catch (error: any) {

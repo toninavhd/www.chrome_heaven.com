@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { verifyAdminPassword } from './actions';
 
 const AdminIcon = () => (
   <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -131,13 +132,36 @@ export default function AdminPage() {
     setNewPostDate(new Date().toISOString().split('T')[0]);
   }, [isLoggedOn]);
 
-  const handleLogon = (e?: React.FormEvent) => {
+  const handleLogon = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (password.toLowerCase() === 'heaven') {
+    const isValid = await verifyAdminPassword(password);
+    if (isValid) {
       setIsLoggedOn(true);
     } else {
       alert('The password you entered is incorrect. Access denied.');
       setPassword('');
+    }
+  };
+
+  const handleDeleteItem = async (type: 'tracks' | 'gallery' | 'posts', id: string) => {
+    if (!confirm('Are you sure you want to delete this item?')) return;
+    const formData = new FormData();
+    formData.append('action', 'delete_item');
+    formData.append('type', type);
+    formData.append('id', id);
+
+    try {
+      const res = await fetch('/api/content', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (type === 'tracks') setTracks(data.db.tracks);
+        if (type === 'gallery') setGalleryItems(data.db.gallery);
+        if (type === 'posts') setPosts(data.db.posts);
+      } else {
+        alert(data.message || 'Error deleting item');
+      }
+    } catch (err) {
+      alert('Network error while deleting.');
     }
   };
 
@@ -226,7 +250,6 @@ export default function AdminPage() {
                 <button type="button" className="win2k-btn py-1 w-full text-center" onClick={() => window.location.href = '/'}>Cancel</button>
               </div>
             </div>
-            <div className="px-4 pb-2 text-[9px] text-gray-500 font-mono text-center">Hint: Password is &quot;heaven&quot;</div>
           </form>
         </div>
       ) : (
@@ -434,6 +457,18 @@ export default function AdminPage() {
                         Upload Track
                       </button>
                     </div>
+
+                    <div className="mt-4 pt-2 border-t border-gray-300">
+                      <div className="font-bold text-gray-700 mb-2">Existing Tracks ({tracks.length})</div>
+                      <div className="flex flex-col gap-1 max-h-[120px] overflow-y-auto win2k-border-inset p-1 bg-white">
+                        {tracks.map(t => (
+                          <div key={t.id} className="flex justify-between items-center bg-gray-50 border-b border-gray-200 p-1">
+                            <span className="truncate">{t.title} - {t.artist}</span>
+                            <button className="win2k-btn bg-red-100 text-red-900 px-2 py-0.5" onClick={() => handleDeleteItem('tracks', t.id)}>Delete</button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -575,6 +610,18 @@ export default function AdminPage() {
                         Upload
                       </button>
                     </div>
+
+                    <div className="mt-4 pt-2 border-t border-gray-300">
+                      <div className="font-bold text-gray-700 mb-2">Existing Visuals ({galleryItems.length})</div>
+                      <div className="flex flex-col gap-1 max-h-[120px] overflow-y-auto win2k-border-inset p-1 bg-white">
+                        {galleryItems.map(g => (
+                          <div key={g.id} className="flex justify-between items-center bg-gray-50 border-b border-gray-200 p-1">
+                            <span className="truncate">{g.name} [{g.type}]</span>
+                            <button className="win2k-btn bg-red-100 text-red-900 px-2 py-0.5" onClick={() => handleDeleteItem('gallery', g.id)}>Delete</button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -704,6 +751,18 @@ export default function AdminPage() {
                       >
                         Publish Post
                       </button>
+                    </div>
+
+                    <div className="mt-4 pt-2 border-t border-gray-300">
+                      <div className="font-bold text-gray-700 mb-2">Existing Posts ({posts.length})</div>
+                      <div className="flex flex-col gap-1 max-h-[120px] overflow-y-auto win2k-border-inset p-1 bg-white">
+                        {posts.map(p => (
+                          <div key={p.id} className="flex justify-between items-center bg-gray-50 border-b border-gray-200 p-1">
+                            <span className="truncate">{p.title} - {p.date}</span>
+                            <button className="win2k-btn bg-red-100 text-red-900 px-2 py-0.5" onClick={() => handleDeleteItem('posts', p.id)}>Delete</button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
