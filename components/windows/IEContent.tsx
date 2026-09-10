@@ -26,7 +26,7 @@ export const IEContent: React.FC = () => {
 
           <div className="flex items-center gap-4 mb-4 border-b pb-3">
             <Image
-              src="/images/uloe_logo.png"
+              src="/images/Captura_de_pantalla_2026-09-10_143748.png"
               alt="Uloe avatar"
               width={48}
               height={48}
