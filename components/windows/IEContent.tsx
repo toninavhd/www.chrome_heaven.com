@@ -23,10 +23,10 @@ export const IEContent: React.FC = () => {
           <div className="bg-gradient-to-r from-blue-900 to-blue-400 text-white font-bold p-1 text-[11px] mb-3">
             Internet Explorer Web Portal
           </div>
-          
+
           <div className="flex items-center gap-4 mb-4 border-b pb-3">
             <Image
-              src="/images/avatar.png"
+              src="/images/uloe_logo.png"
               alt="Uloe avatar"
               width={48}
               height={48}
