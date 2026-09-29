@@ -1,9 +1,9 @@
 import { Track, VisualizerPreset, GalleryItem, BlogPost } from '../types';
 
 export const VISUALIZER_PRESETS: { id: VisualizerPreset; label: string; description: string }[] = [
-  { id: 'battery', label: 'Battery', description: 'Classic WMP battery bars' },
-  { id: 'mathical', label: 'Mathical Music', description: 'Dreamy pulses and glowing orbs' },
-  { id: 'spectrum', label: 'Ethereal Spectrum', description: 'Glowing frequency bands' },
+  { id: 'battery', label: 'Batería: Fog Spectrum', description: 'Niebla psicodélica y barras reactivas WMP' },
+  { id: 'mathical', label: 'Batería: Acid Ambience', description: 'Vórtice de humo ácido y lissajous mutantes' },
+  { id: 'spectrum', label: 'Batería: Cosmic Nebula', description: 'Túnel warp, estrellas y nebulosa psicodélica' },
 ];
 
 export const TRACK_SLUG_MAP: { [key: string]: string } = {
@@ -16,6 +16,7 @@ export const DEFAULT_TRACKS: Track[] = [
     id: 'nevermind_190bpm_uloe',
     title: 'nevermind 190bpm',
     artist: 'Chrome Heaven',
+    album: 'Singles',
     genre: 'Local WAV / 190 BPM',
     audioUrl: '/audio/nevermind_190bpm_uloe.wav',
   },
@@ -23,6 +24,7 @@ export const DEFAULT_TRACKS: Track[] = [
     id: 'lonelystarr',
     title: 'lonelystarr',
     artist: 'Chrome Heaven',
+    album: 'Singles',
     genre: 'Local WAV / Dreamcore',
     audioUrl: '/audio/lonelystarr.wav',
   },
@@ -30,6 +32,7 @@ export const DEFAULT_TRACKS: Track[] = [
     id: 'malice',
     title: 'ｍａｌｉｃｅ [EP]',
     artist: 'Chrome Heaven',
+    album: 'ｍａｌｉｃｅ EP',
     genre: 'Electronic / Dreamcore',
     audioUrl: '',
   },
@@ -37,12 +40,13 @@ export const DEFAULT_TRACKS: Track[] = [
     id: 'bleedmeariver',
     title: 'BleedMeARiver',
     artist: 'Chrome Heaven',
+    album: 'ｍａｌｉｃｅ EP',
     genre: 'Electronic',
     audioUrl: '',
   },
 ];
 
-export const BATTERY_CELLS = 10;
+export const BATTERY_CELLS = 32;
 
 export const DEFAULT_GALLERY_ITEMS: GalleryItem[] = [
   { id: 'g1', name: 'paris_2023.bmp', src: '/images/gallery_1.png', tag: 'Paris2023' },

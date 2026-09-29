@@ -63,7 +63,9 @@ export default function Home() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const sourceElementRef = useRef<HTMLAudioElement | null>(null); // track which <audio> the source node belongs to
   const animationFrameRef = useRef<number | null>(null);
+  const vizRunningRef = useRef(false); // flag to control draw loop lifecycle
 
   useEffect(() => {
     const loadContent = async () => {
@@ -131,51 +133,86 @@ export default function Home() {
     setCurrentTime(0);
     setDuration(0);
     stopVisualizer();
+    // Disconnect old source node — it belongs to the previous <audio> element.
+    // A new one will be created the next time startVisualizer() is called.
+    if (sourceRef.current) {
+      try { sourceRef.current.disconnect(); } catch (_) { /* ignore */ }
+      sourceRef.current = null;
+    }
+    sourceElementRef.current = null;
   }, [currentTrack.id]);
 
   const stopVisualizer = () => {
+    vizRunningRef.current = false;
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
   };
 
-  const startVisualizer = () => {
+  const startVisualizer = async () => {
     const audio = audioRef.current;
     if (!audio || typeof window === 'undefined') return;
 
+    // Create AudioContext once
     if (!audioContextRef.current) {
-      const AudioContextImpl = window.AudioContext || (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      const AudioContextImpl =
+        window.AudioContext ||
+        (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AudioContextImpl) return;
       audioContextRef.current = new AudioContextImpl();
     }
 
+    // Resume if suspended (browser autoplay policy)
+    if (audioContextRef.current.state === 'suspended') {
+      await audioContextRef.current.resume();
+    }
+
+    // Create analyser once per AudioContext
     if (!analyserRef.current) {
       analyserRef.current = audioContextRef.current.createAnalyser();
       analyserRef.current.fftSize = 256;
-      sourceRef.current = audioContextRef.current.createMediaElementSource(audio);
-      sourceRef.current.connect(analyserRef.current);
+      analyserRef.current.smoothingTimeConstant = 0.65;
       analyserRef.current.connect(audioContextRef.current.destination);
     }
 
-    stopVisualizer();
-    const bufferLength = analyserRef.current!.frequencyBinCount;
+    // Create source node only if the audio element has changed (new track = new <audio> element)
+    if (sourceElementRef.current !== audio) {
+      if (sourceRef.current) {
+        try { sourceRef.current.disconnect(); } catch (_) { /* ignore */ }
+      }
+      sourceRef.current = audioContextRef.current.createMediaElementSource(audio);
+      sourceRef.current.connect(analyserRef.current);
+      sourceElementRef.current = audio;
+    }
+
+    stopVisualizer(); // cancel any existing loop before starting new one
+    vizRunningRef.current = true;
+
+    const bufferLength = analyserRef.current.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
     const draw = () => {
-      if (!audioRef.current || audioRef.current.paused || audioRef.current.ended) {
-        setIsPlaying(false);
-        stopVisualizer();
-        return;
-      }
+      if (!vizRunningRef.current) return; // loop was stopped externally
 
       analyserRef.current?.getByteFrequencyData(dataArray);
       const nextBars = Array.from({ length: BATTERY_CELLS }, (_, index) => {
-        const start = Math.floor((index / BATTERY_CELLS) * bufferLength);
-        const end = Math.floor(((index + 1) / BATTERY_CELLS) * bufferLength);
-        const average = dataArray.slice(start, end).reduce((sum, value) => sum + value, 0) / Math.max(1, end - start);
-        const height = Math.max(10, Math.min(48, Math.round((average / 255) * 42) + 6));
-        return height;
+        // Perceptual/logarithmic frequency mapping across bins
+        const p0 = Math.pow(index / BATTERY_CELLS, 1.5);
+        const p1 = Math.pow((index + 1) / BATTERY_CELLS, 1.5);
+        const start = Math.floor(p0 * (bufferLength - 1));
+        const end = Math.max(start + 1, Math.ceil(p1 * (bufferLength - 1)));
+        let sum = 0;
+        let count = 0;
+        for (let b = start; b < end && b < bufferLength; b++) {
+          sum += dataArray[b];
+          count++;
+        }
+        const avg = count > 0 ? sum / count : 0;
+        // Treble/mid equal-loudness boost so higher bands react as vigorously as bass
+        const boost = 1.0 + Math.pow(index / BATTERY_CELLS, 1.1) * 1.6;
+        const normalized = Math.min(100, Math.round((avg / 255) * 100 * boost));
+        return Math.max(0, normalized);
       });
 
       setVisualizerBars(nextBars);
@@ -189,9 +226,12 @@ export default function Home() {
     const audio = audioRef.current;
     if (!audio) return;
     if (audio.paused) {
-      void audio.play();
-      setIsPlaying(true);
-      startVisualizer();
+      void audio.play().then(() => {
+        setIsPlaying(true);
+        void startVisualizer();
+      }).catch(err => {
+        console.warn('Playback failed:', err);
+      });
     } else {
       audio.pause();
       setIsPlaying(false);
