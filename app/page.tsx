@@ -404,15 +404,17 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="win2k-menu bg-[#d0d0c8] select-none">
-                <span className="win2k-menu-item">File</span>
-                <span className="win2k-menu-item">Edit</span>
-                <span className="win2k-menu-item">View</span>
-                <span className="win2k-menu-item">Help</span>
-              </div>
+              {win.id !== 'links' && (
+                <div className="win2k-menu bg-[#d0d0c8] select-none">
+                  <span className="win2k-menu-item">File</span>
+                  <span className="win2k-menu-item">Edit</span>
+                  <span className="win2k-menu-item">View</span>
+                  <span className="win2k-menu-item">Help</span>
+                </div>
+              )}
 
-              <div className="flex-1 bg-white overflow-hidden flex flex-col p-1.5">
-                <div className="flex-1 win2k-border-inset overflow-y-auto win2k-scroll text-black p-3 bg-white font-sans text-[12px] select-text">
+              <div className={`flex-1 overflow-hidden flex flex-col ${win.id === 'links' ? 'p-0 bg-[#070509]' : 'p-1.5 bg-white'}`}>
+                <div className={`flex-1 ${win.id === 'links' ? 'overflow-hidden flex flex-col' : 'win2k-border-inset overflow-y-auto win2k-scroll text-black p-3 bg-white font-sans text-[12px] select-text'}`}>
                   
                   {win.id === 'welcome' && <WelcomeContent openWindow={openWindow} />}
                   

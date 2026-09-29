@@ -189,12 +189,12 @@ function drawPsychedelicFog(
     const py = cy + driftY + (p.relY - 0.5) * (h * 0.55);
 
     const rad = p.baseRadius * minDim * (0.85 + (energy / 100) * 0.75 + beatPulse * 0.5);
-    if (rad <= 1) continue;
+    if (!isFinite(px) || !isFinite(py) || !isFinite(rad) || rad <= 1) continue;
 
     const hue = (masterHue + p.hueOffset + t * 24) % 360;
     const coreAlpha = 0.22 + (energy / 100) * 0.38 + beatPulse * 0.28;
 
-    const grad = ctx.createRadialGradient(px, py, 0, px, py, rad);
+    const grad = ctx.createRadialGradient(px, py, 0, px, py, Math.max(1, rad));
     grad.addColorStop(0, `hsla(${hue}, 100%, 65%, ${coreAlpha})`);
     grad.addColorStop(0.38, `hsla(${(hue + 45) % 360}, 95%, 48%, ${coreAlpha * 0.55})`);
     grad.addColorStop(0.72, `hsla(${(hue + 90) % 360}, 90%, 30%, ${coreAlpha * 0.18})`);
