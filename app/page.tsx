@@ -70,7 +70,8 @@ export default function Home() {
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const res = await fetch('/content.json');
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        const res = await fetch(`${basePath}/content.json`);
         if (res.ok) {
           const data = await res.json();
           if (data.tracks && data.tracks.length > 0) {
