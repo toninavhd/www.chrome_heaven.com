@@ -5,12 +5,13 @@ import path from "path";
 const hasCustomDomain = fs.existsSync(path.join(process.cwd(), "public", "CNAME"));
 const defaultRepoPath = "/www.chrome_heaven.com";
 
-// If NEXT_PUBLIC_BASE_PATH is explicitly set, use it.
-// If running in GitHub Actions without a custom CNAME, default to repository subpath.
-// Otherwise (local development or custom domain), use empty string.
+// Use NEXT_PUBLIC_BASE_PATH only if it's explicitly set to a non-empty string.
+// If running in GitHub Actions without a custom CNAME, auto-use the repo subpath.
+// Otherwise (local dev or custom domain), use empty string.
+const envBasePath = process.env.NEXT_PUBLIC_BASE_PATH;
 const basePath =
-  process.env.NEXT_PUBLIC_BASE_PATH !== undefined
-    ? process.env.NEXT_PUBLIC_BASE_PATH
+  envBasePath && envBasePath.trim() !== ""
+    ? envBasePath
     : process.env.GITHUB_ACTIONS === "true" && !hasCustomDomain
     ? defaultRepoPath
     : "";
