@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 import { Track, VisualizerPreset, GalleryItem, BlogPost, WindowState } from '../types';
-import { VISUALIZER_PRESETS, BATTERY_CELLS, DEFAULT_TRACKS, DEFAULT_GALLERY_ITEMS, DEFAULT_POSTS, WALLPAPERS } from '../constants';
+import { BATTERY_CELLS, DEFAULT_TRACKS, DEFAULT_GALLERY_ITEMS, DEFAULT_POSTS, WALLPAPERS } from '../constants';
 
 import {
   MyComputerIcon,
@@ -110,6 +110,25 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.altKey && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault();
+        window.location.href = '/admin';
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const stopVisualizer = () => {
+    vizRunningRef.current = false;
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+  };
+
+  useEffect(() => {
     return () => {
       stopVisualizer();
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
@@ -136,19 +155,11 @@ export default function Home() {
     // Disconnect old source node — it belongs to the previous <audio> element.
     // A new one will be created the next time startVisualizer() is called.
     if (sourceRef.current) {
-      try { sourceRef.current.disconnect(); } catch (_) { /* ignore */ }
+      try { sourceRef.current.disconnect(); } catch { /* ignore */ }
       sourceRef.current = null;
     }
     sourceElementRef.current = null;
   }, [currentTrack.id]);
-
-  const stopVisualizer = () => {
-    vizRunningRef.current = false;
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-  };
 
   const startVisualizer = async () => {
     const audio = audioRef.current;
@@ -179,7 +190,7 @@ export default function Home() {
     // Create source node only if the audio element has changed (new track = new <audio> element)
     if (sourceElementRef.current !== audio) {
       if (sourceRef.current) {
-        try { sourceRef.current.disconnect(); } catch (_) { /* ignore */ }
+        try { sourceRef.current.disconnect(); } catch { /* ignore */ }
       }
       sourceRef.current = audioContextRef.current.createMediaElementSource(audio);
       sourceRef.current.connect(analyserRef.current);
@@ -470,7 +481,12 @@ export default function Home() {
                 <div className="win2k-status-bar select-none">
                   <div className="win2k-status-field">Status: Active</div>
                   <div className="win2k-status-field">Canary Islands</div>
-                  <div className="win2k-status-field font-mono text-right">CH95</div>
+                  <div 
+                    className="win2k-status-field font-mono text-right cursor-default"
+                    onDoubleClick={() => { window.location.href = '/admin'; }}
+                  >
+                    CH95
+                  </div>
                 </div>
               </div>
             </motion.div>

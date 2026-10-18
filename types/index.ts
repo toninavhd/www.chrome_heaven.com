@@ -42,3 +42,11 @@ export interface WindowState {
   height: number | string;
   icon: React.ReactNode;
 }
+
+export interface Wallpaper {
+  id: string;
+  name: string;
+  value: string;
+  type: string;
+}
+

@@ -483,13 +483,13 @@ const Album3DCard: React.FC<Album3DCardProps> = ({ album, isPlaying, onTogglePla
           <div
             className="absolute pointer-events-none"
             style={{
-              top: 6,
-              left: 8,
-              width: 128,
-              height: 128,
+              top: 13,   // 6 + (128 - 114) / 2 -> centrado con la portada
+              left: 15,  // 8 + (128 - 114) / 2
+              width: 114,
+              height: 114,
               zIndex: 5,
               opacity: isPlaying ? 1 : 0,
-              transform: isPlaying ? 'translateX(70px)' : 'translateX(0px)',
+              transform: isPlaying ? 'translateX(72px)' : 'translateX(0px)',
               transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease-out',
               filter: isPlaying ? 'drop-shadow(0 0 12px rgba(0,240,255,0.7))' : 'none',
             }}
@@ -522,10 +522,10 @@ const Album3DCard: React.FC<Album3DCardProps> = ({ album, isPlaying, onTogglePla
               </div>
               {/* Agujero central */}
               <div
-                className="w-10 h-10 rounded-full bg-[#0a0515] border-2 border-[#fff] relative flex items-center justify-center"
-                style={{ boxShadow: 'inset 0 0 6px rgba(0,0,0,0.9)' }}
+                className="rounded-full bg-[#0a0515] border-2 border-[#fff] relative flex items-center justify-center"
+                style={{ width: 36, height: 36, boxShadow: 'inset 0 0 6px rgba(0,0,0,0.9)' }}
               >
-                <div className="w-3.5 h-3.5 rounded-full bg-transparent border border-[#555]" />
+                <div className="w-3 h-3 rounded-full bg-transparent border border-[#555]" />
               </div>
             </div>
           </div>
@@ -890,25 +890,25 @@ export const IEContent: React.FC = () => {
               onClick={() => navigateTo('portal')}
               className="cursor-pointer hover:underline text-[#0044aa]"
             >
-              // PORTAL
+              {'// PORTAL'}
             </span>
             <span
               onClick={() => navigateTo('music')}
               className="cursor-pointer hover:underline text-[#0044aa]"
             >
-              // RELEASES
+              {'// RELEASES'}
             </span>
             <span
               onClick={() => navigateTo('lab3d')}
               className="cursor-pointer hover:underline text-[#7700aa]"
             >
-              // 3D LAB
+              {'// 3D LAB'}
             </span>
             <span
               onClick={() => navigateTo('links')}
               className="cursor-pointer hover:underline text-[#0044aa]"
             >
-              // DIRECTORY
+              {'// DIRECTORY'}
             </span>
           </div>
 
@@ -1020,7 +1020,7 @@ export const IEContent: React.FC = () => {
                   <span className="text-[#00ffff]">HEAVEN</span>
                 </div>
                 <div className="text-[8px] font-mono text-[#ffcc00] tracking-widest">
-                  CYBER Y2K // 3D PORTAL
+                  CYBER Y2K {'//'} 3D PORTAL
                 </div>
               </div>
             </div>
@@ -1056,7 +1056,7 @@ export const IEContent: React.FC = () => {
                       className="text-[8px] font-mono tracking-widest mt-0.5"
                       style={{ color: isActive ? '#ffcc00' : '#8855aa' }}
                     >
-                      {item.cnLabel} // {item.code}
+                      {item.cnLabel} {'//'} {item.code}
                     </div>
 
                     {isActive && (
@@ -1089,7 +1089,7 @@ export const IEContent: React.FC = () => {
             >
               <div className="flex items-center justify-between border-b border-[#330044] pb-1 mb-2">
                 <span className="text-[9px] font-mono font-bold text-[#ff77ff] tracking-widest">
-                  // IDENTITY CARD // 身份卡
+                  {'// IDENTITY CARD // 身份卡'}
                 </span>
                 <span className="w-2 h-2 bg-emerald-400 animate-pulse" />
               </div>
@@ -1117,7 +1117,7 @@ export const IEContent: React.FC = () => {
                   <div className="text-[11px] font-bold text-white font-mono truncate">
                     CHROME HEAVEN
                   </div>
-                  <div className="text-[8px] text-[#ffcc00] font-mono">// WEBMASTER: ChromeHeavenLord</div>
+                  <div className="text-[8px] text-[#ffcc00] font-mono">{'// WEBMASTER: ChromeHeavenLord'}</div>
                   <div className="text-[8px] text-[#8877aa] font-mono mt-0.5">
                     影が届くまで
                   </div>
@@ -1140,7 +1140,7 @@ export const IEContent: React.FC = () => {
               }}
             >
               <div className="text-[9px] font-bold text-[#00e0ff] border-b border-[#003355] pb-1 mb-1">
-                // SYSTEM & METEO STATUS //
+                {'// SYSTEM & METEO STATUS //'}
               </div>
               <div className="text-[#aaddff]">
                 <span>CYBERSPACE: RAIN</span>
@@ -1195,14 +1195,14 @@ export const IEContent: React.FC = () => {
                   <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex-1">
                       <div className="inline-block px-2 py-0.5 bg-[#ff00ff] text-black font-mono font-bold text-[8px] mb-1.5">
-                        // OFFICIAL PORTAL 2000-2026 //
+                        {'// OFFICIAL PORTAL 2000-2026 //'}
                       </div>
                       <h1 className="text-[20px] sm:text-[26px] font-mono font-extrabold text-white tracking-wider flex items-center gap-2">
                         <span className="text-[#00ffff]">CHROME</span>
                         <span className="text-[#ff00ff]">HEAVEN</span>
                       </h1>
                       <div className="text-[10px] text-[#ffcc00] font-mono tracking-widest mt-0.5">
-                        影が届くまで // 虚拟梦核与未来记忆
+                        影が届くまで {'//'} 虚拟梦核与未来记忆
                       </div>
                       <p className="text-[9px] text-[#ccaacc] font-mono mt-2.5 max-w-xl leading-relaxed">
                         Welcome to the official online sanctuary. Bridging Chinese 2000s web aesthetics with modern 3D WebGL interactive design.
@@ -1212,13 +1212,13 @@ export const IEContent: React.FC = () => {
                           onClick={() => navigateTo('music')}
                           className="px-3 py-1.5 text-[9px] font-bold font-mono bg-gradient-to-r from-[#ff0080] to-[#ff00ff] text-white border border-white cursor-pointer hover:brightness-110 shadow-md"
                         >
-                          [DISCOGRAPHY // 作品列表]
+                          {'[DISCOGRAPHY // 作品列表]'}
                         </button>
                         <button
                           onClick={() => navigateTo('lab3d')}
                           className="px-3 py-1.5 text-[9px] font-bold font-mono bg-[#110022] text-[#00ffff] border border-[#00ffff] cursor-pointer hover:bg-[#220044]"
                         >
-                          [ENTER 3D LAB // 进入空间]
+                          {'[ENTER 3D LAB // 进入空间]'}
                         </button>
                       </div>
                     </div>
@@ -1249,7 +1249,7 @@ export const IEContent: React.FC = () => {
                 {/* 3D Rotating Album Showcase (Featured Release) */}
                 <div className="flex flex-col gap-2">
                   <div className="text-[10px] font-mono font-bold text-[#00ffff] tracking-widest flex items-center justify-between border-b border-[#220044] pb-1">
-                    <span>// SPOTLIGHT RELEASE: 3D CD PLAYER //</span>
+                    <span>{'// SPOTLIGHT RELEASE: 3D CD PLAYER //'}</span>
                     <span className="text-[8px] text-[#ffcc00]">[CLICK COVER TO EJECT CD]</span>
                   </div>
 
@@ -1269,7 +1269,7 @@ export const IEContent: React.FC = () => {
                   }}
                 >
                   <div className="text-[9px] font-mono font-bold text-[#ffcc00] border-b border-[#330033] pb-1 mb-2 flex justify-between">
-                    <span>// BBS BULLETINS & ANNOUNCEMENTS // 站长公告</span>
+                    <span>{'// BBS BULLETINS & ANNOUNCEMENTS // 站长公告'}</span>
                     <span>ARCHIVE 2026.09</span>
                   </div>
 
@@ -1306,7 +1306,7 @@ export const IEContent: React.FC = () => {
                 >
                   <div>
                     <h2 className="text-[13px] font-mono font-bold text-white tracking-wider">
-                      // OFFICIAL DISCOGRAPHY // 音乐作品全集
+                      {'// OFFICIAL DISCOGRAPHY // 音乐作品全集'}
                     </h2>
                     <div className="text-[8px] font-mono text-[#ffcc00]">
                       CLICK ANY 3D ALBUM TO EJECT ITS HOLOGRAPHIC CD AND PREVIEW
@@ -1344,7 +1344,7 @@ export const IEContent: React.FC = () => {
                 <div className="border-b border-[#220044] pb-1.5 flex items-center justify-between">
                   <div>
                     <h2 className="text-[13px] font-mono font-bold text-white tracking-wider flex items-center gap-1.5">
-                      <span>// 3D CYBERSPACE LAB //</span>
+                      <span>{'// 3D CYBERSPACE LAB //'}</span>
                       <span className="text-[9px] text-[#ff00ff]">[UNICORN STUDIO ENGINE]</span>
                     </h2>
                     <div className="text-[8px] font-mono text-[#ffcc00]">
@@ -1431,7 +1431,7 @@ export const IEContent: React.FC = () => {
               >
                 <div className="border-b border-[#332200] pb-1.5 flex justify-between items-center">
                   <h2 className="text-[12px] font-bold text-[#ffcc00] tracking-widest">
-                    // MANIFESTO & THEOLOGY // 天堂档案
+                    {'// MANIFESTO & THEOLOGY // 天堂档案'}
                   </h2>
                   <span className="text-[8px] text-[#888]">DECLASSIFIED 2026</span>
                 </div>
@@ -1479,7 +1479,7 @@ export const IEContent: React.FC = () => {
                 >
                   <div>
                     <h2 className="text-[13px] font-mono font-bold text-white tracking-wider">
-                      // OFFICIAL DIRECTORY // 官方传送门
+                      {'// OFFICIAL DIRECTORY // 官方传送门'}
                     </h2>
                     <div className="text-[8px] font-mono text-[#ffcc00]">
                       CLICK ANY DESTINATION TO ACCESS STREAMING & SOCIALS

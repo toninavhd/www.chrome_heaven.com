@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { verifyAdminPassword } from './actions';
+import { verifyAdminPassword, setCustomAdminPassword, resetCustomAdminPassword } from './actions';
 
 const AdminIcon = () => (
   <svg className="w-8 h-8 desktop-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -64,11 +64,31 @@ const WALLPAPERS = [
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
-  const [isLoggedOn, setIsLoggedOn] = useState(false);
+  const [isLoggedOn, setIsLoggedOn] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('ch_admin_session') === 'active';
+    }
+    return false;
+  });
+  const [failedAttempts, setFailedAttempts] = useState(0);
   const [activeTab, setActiveTab] = useState<'music' | 'visuals' | 'blog' | 'settings'>('music');
 
-  // Wallpaper state (persists via localStorage)
-  const [wallpaper, setWallpaper] = useState(WALLPAPERS[0]);
+  // Wallpaper state (persists via localStorage) initialized cleanly
+  const [wallpaper, setWallpaper] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('admin_wallpaper');
+      if (saved) {
+        const found = WALLPAPERS.find(w => w.id === saved);
+        if (found) return found;
+      }
+    }
+    return WALLPAPERS[0];
+  });
+
+  // Password change state
+  const [customPassword, setCustomPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [securityStatus, setSecurityStatus] = useState('');
 
   // Database loaded states
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -94,20 +114,11 @@ export default function AdminPage() {
 
   // Blog upload state
   const [newPostTitle, setNewPostTitle] = useState('');
-  const [newPostDate, setNewPostDate] = useState('');
+  const [newPostDate, setNewPostDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [newPostContent, setNewPostContent] = useState('');
   const [newPostAttachedImage, setNewPostAttachedImage] = useState('');
   const [newPostAttachedAudio, setNewPostAttachedAudio] = useState('');
   const [newPostStatus, setNewPostStatus] = useState({ type: '', text: '' });
-
-  // Load wallpaper preference from localStorage
-  useEffect(() => {
-    const savedWallpaperId = localStorage.getItem('admin_wallpaper');
-    if (savedWallpaperId) {
-      const found = WALLPAPERS.find(w => w.id === savedWallpaperId);
-      if (found) setWallpaper(found);
-    }
-  }, []);
 
   // Load database metadata to populate selectors
   useEffect(() => {
@@ -127,19 +138,33 @@ export default function AdminPage() {
     loadContent();
   }, []);
 
-  // Update date pre-fill
-  useEffect(() => {
-    setNewPostDate(new Date().toISOString().split('T')[0]);
-  }, [isLoggedOn]);
-
   const handleLogon = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const isValid = await verifyAdminPassword(password);
     if (isValid) {
       setIsLoggedOn(true);
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('ch_admin_session', 'active');
+      }
+      setFailedAttempts(0);
     } else {
-      alert('The password you entered is incorrect. Access denied.');
+      const nextAttempts = failedAttempts + 1;
+      setFailedAttempts(nextAttempts);
       setPassword('');
+      if (nextAttempts >= 3) {
+        alert('Access denied: Too many failed attempts. Returning to desktop...');
+        window.location.href = '/';
+      } else {
+        alert(`The password you entered is incorrect. Access denied. (${3 - nextAttempts} attempts remaining)`);
+      }
+    }
+  };
+
+  const handleLogOff = () => {
+    setIsLoggedOn(false);
+    setPassword('');
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('ch_admin_session');
     }
   };
 
@@ -157,11 +182,15 @@ export default function AdminPage() {
         if (type === 'tracks') setTracks(data.db.tracks);
         if (type === 'gallery') setGalleryItems(data.db.gallery);
         if (type === 'posts') setPosts(data.db.posts);
-      } else {
-        alert(data.message || 'Error deleting item');
+        return;
       }
-    } catch (err) {
-      alert('Network error while deleting.');
+      throw new Error(data.message || 'API unavailable');
+    } catch {
+      // In static / GitHub Pages mode: update state locally
+      if (type === 'tracks') setTracks(prev => prev.filter(t => t.id !== id));
+      if (type === 'gallery') setGalleryItems(prev => prev.filter(g => g.id !== id));
+      if (type === 'posts') setPosts(prev => prev.filter(p => p.id !== id));
+      alert('Item removed from session. Remember to click "Export Database" in Settings to save changes to content.json!');
     }
   };
 
@@ -270,7 +299,7 @@ export default function AdminPage() {
               <div className="flex gap-1 pl-2">
                 <button 
                   className="win2k-title-btn font-bold text-red-700 font-sans" 
-                  onClick={() => { setIsLoggedOn(false); setPassword(''); }}
+                  onClick={handleLogOff}
                   title="Log Off"
                 >
                   X
@@ -434,7 +463,7 @@ export default function AdminPage() {
                             } else {
                               throw new Error(data.message || 'API error');
                             }
-                          } catch (err: any) {
+                          } catch {
                             // Fallback simulation
                             const fileUrl = URL.createObjectURL(uploadTrackFile);
                             const coverUrl = uploadTrackCoverFile ? URL.createObjectURL(uploadTrackCoverFile) : undefined;
@@ -446,7 +475,7 @@ export default function AdminPage() {
                               audioUrl: fileUrl,
                               ...(coverUrl ? { coverUrl } : {})
                             }]);
-                            setUploadTrackStatus({ type: 'success', text: `Session Simulation: "${uploadTrackTitle}" registered. (Preview only — run dev server to save to disk)` });
+                            setUploadTrackStatus({ type: 'success', text: `✓ Session Registration: "${uploadTrackTitle}" registered! Click "Export content.json" in Settings to save to disk.` });
                             setUploadTrackTitle('');
                             setUploadTrackFile(null);
                             setUploadTrackCoverFile(null);
@@ -588,7 +617,7 @@ export default function AdminPage() {
                             } else {
                               throw new Error(data.message || 'API error');
                             }
-                          } catch (err: any) {
+                          } catch {
                             // Fallback simulation
                             const fileUrl = URL.createObjectURL(uploadMediaFile);
                             setGalleryItems(prev => [...prev, {
@@ -599,7 +628,7 @@ export default function AdminPage() {
                               type: uploadMediaType,
                               ...(uploadMediaDescription ? { description: uploadMediaDescription } : {})
                             }]);
-                            setUploadMediaStatus({ type: 'success', text: `Session Simulation: "${uploadMediaName}" registered. (Preview only — run dev server to save to disk)` });
+                            setUploadMediaStatus({ type: 'success', text: `✓ Session Registration: "${uploadMediaName}" registered! Click "Export content.json" in Settings to save to disk.` });
                             setUploadMediaName('');
                             setUploadMediaTag('');
                             setUploadMediaDescription('');
@@ -704,7 +733,7 @@ export default function AdminPage() {
                     <div className="flex justify-between items-center pt-1 mt-auto">
                       <button
                         className="win2k-btn bg-red-100 border-red-400 text-red-950 font-bold px-3 py-1"
-                        onClick={() => { setIsLoggedOn(false); setPassword(''); }}
+                        onClick={handleLogOff}
                       >
                         Log Off
                       </button>
@@ -738,10 +767,10 @@ export default function AdminPage() {
                             } else {
                               throw new Error(data.message || 'API error');
                             }
-                          } catch (err: any) {
-                            const simulatedId = 'sim_p_' + Date.now();
+                          } catch {
+                            const simulatedId = 'post_' + Date.now();
                             setPosts(prev => [{ id: simulatedId, title: newPostTitle, date: newPostDate || new Date().toISOString().split('T')[0], content: newPostContent, imageSrc: newPostAttachedImage, audioSrc: newPostAttachedAudio }, ...prev]);
-                            setNewPostStatus({ type: 'success', text: `Session Simulation: Post added. (Preview only — run dev server to save to disk)` });
+                            setNewPostStatus({ type: 'success', text: `✓ Session Registration: Post "${newPostTitle}" added! Click "Export content.json" in Settings to save to disk.` });
                             setNewPostTitle('');
                             setNewPostContent('');
                             setNewPostAttachedImage('');
@@ -810,9 +839,120 @@ export default function AdminPage() {
                     <div className="mt-2 text-[10px] text-gray-500 border-t pt-2">
                       <div className="font-bold mb-1">Current wallpaper:</div>
                       <div
-                        className="h-12 border border-gray-400"
+                        className="h-10 border border-gray-400"
                         style={bgStyle}
                       />
+                    </div>
+
+                    {/* Database Export & Synchronization */}
+                    <div className="mt-2 border-t pt-2 flex flex-col gap-2">
+                      <div className="font-bold text-blue-900 uppercase tracking-wider">Database Synchronization</div>
+                      <p className="text-[10px] text-gray-600">Export the current tracks, visuals, and diary posts to update your website on GitHub Pages:</p>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          className="win2k-btn font-bold px-3 py-1 flex-1 text-center"
+                          onClick={() => {
+                            const db = { tracks, gallery: galleryItems, posts };
+                            const jsonStr = JSON.stringify(db, null, 2);
+                            const blob = new Blob([jsonStr], { type: 'application/json' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'content.json';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                          }}
+                        >
+                          ⬇ Download content.json
+                        </button>
+                        <button
+                          type="button"
+                          className="win2k-btn px-3 py-1 text-center"
+                          onClick={async () => {
+                            const db = { tracks, gallery: galleryItems, posts };
+                            const jsonStr = JSON.stringify(db, null, 2);
+                            await navigator.clipboard.writeText(jsonStr);
+                            alert('✓ content.json copied to clipboard! Paste it into public/content.json and commit.');
+                          }}
+                        >
+                          📋 Copy JSON
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Admin Access & Security Vault */}
+                    <div className="mt-2 border-t pt-2 flex flex-col gap-2">
+                      <div className="font-bold text-blue-900 uppercase tracking-wider">Administrator Security Vault</div>
+                      <p className="text-[10px] text-gray-600">Change your private admin password. This is encrypted with SHA-256 and stored only in your personal browser vault:</p>
+                      
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="w-24 font-semibold text-right">New Password:</span>
+                          <input
+                            type="password"
+                            placeholder="At least 4 characters..."
+                            className="flex-1 px-2 py-0.5 bg-white border border-gray-400 text-black text-xs win2k-border-inset outline-none"
+                            value={customPassword}
+                            onChange={(e) => setCustomPassword(e.target.value)}
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-24 font-semibold text-right">Confirm:</span>
+                          <input
+                            type="password"
+                            placeholder="Repeat new password..."
+                            className="flex-1 px-2 py-0.5 bg-white border border-gray-400 text-black text-xs win2k-border-inset outline-none"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      {securityStatus && (
+                        <div className="p-1.5 bg-green-50 border border-green-500 text-green-900 font-mono text-[10px]">
+                          {securityStatus}
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center pt-1">
+                        <button
+                          type="button"
+                          className="win2k-btn text-gray-700 px-2 py-1 text-[10px]"
+                          onClick={() => {
+                            if (confirm('Reset to initial master password?')) {
+                              resetCustomAdminPassword();
+                              setSecurityStatus('✓ Reset to initial master password.');
+                            }
+                          }}
+                        >
+                          Reset to Default
+                        </button>
+                        <button
+                          type="button"
+                          className="win2k-btn font-bold px-3 py-1"
+                          onClick={async () => {
+                            if (!customPassword || customPassword.length < 4) {
+                              alert('Password must be at least 4 characters long.');
+                              return;
+                            }
+                            if (customPassword !== confirmPassword) {
+                              alert('Passwords do not match.');
+                              return;
+                            }
+                            const success = await setCustomAdminPassword(customPassword);
+                            if (success) {
+                              setSecurityStatus('✓ Admin password successfully updated in browser vault!');
+                              setCustomPassword('');
+                              setConfirmPassword('');
+                            }
+                          }}
+                        >
+                          Save New Password
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

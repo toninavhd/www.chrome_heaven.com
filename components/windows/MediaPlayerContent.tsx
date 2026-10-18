@@ -506,7 +506,7 @@ function drawOscilloscope(
   metrics: AudioMetrics
 ) {
   const bars = safeBars(rawBars);
-  const { energy, bass, mid, treble } = metrics;
+  const { energy, bass, mid } = metrics;
   const { t, masterHue, modeIndex, beatPulse } = state;
 
   // 1. Atmosphere & Fog
@@ -853,7 +853,7 @@ function useWmpVisualizer(
   const isPlayingRef = useRef(isPlaying);
   const engineRef = useRef<VisualizerEngineState | null>(null);
 
-  if (!engineRef.current) {
+  if (engineRef.current == null) {
     engineRef.current = initEngineState();
   }
 
@@ -950,7 +950,6 @@ function useWmpVisualizer(
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasRef]);
 }
 
@@ -1020,7 +1019,6 @@ function ScrollingTitle({ text }: { text: string }) {
   const textRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    setOffset(0);
     let pos = 0;
     const id = setInterval(() => {
       const containerW = containerRef.current?.offsetWidth ?? 0;
@@ -1031,7 +1029,7 @@ function ScrollingTitle({ text }: { text: string }) {
       setOffset(pos);
     }, 30);
     return () => clearInterval(id);
-  }, [text]);
+  }, []);
 
   return (
     <div
@@ -1118,11 +1116,6 @@ export const MediaPlayerContent: React.FC<MediaPlayerContentProps> = ({
 
   const presetIndex = Math.max(0, VISUALIZER_PRESETS.findIndex(p => p.id === visualizerPreset));
   const currentPreset = VISUALIZER_PRESETS[presetIndex] ?? VISUALIZER_PRESETS[0];
-  const cyclePreset = (dir: 1 | -1) => {
-    const len = VISUALIZER_PRESETS.length;
-    if (!len) return;
-    setVisualizerPreset(VISUALIZER_PRESETS[(presetIndex + dir + len) % len].id as VisualizerPreset);
-  };
 
   // Skip prev/next
   const skipTrack = useCallback((dir: 1 | -1) => {
@@ -1344,7 +1337,7 @@ export const MediaPlayerContent: React.FC<MediaPlayerContentProps> = ({
             )}
             <div className="min-w-0 flex-1">
               <div className="text-[9px] tracking-[0.15em] text-[#3a5da3] font-bold uppercase">Now Playing</div>
-              <ScrollingTitle text={currentTrack.title} />
+              <ScrollingTitle key={currentTrack.title} text={currentTrack.title} />
               <div className="text-[10px] text-[#3a5da3] truncate">{currentTrack.artist}{currentTrack.album ? ` · ${currentTrack.album}` : ''}</div>
             </div>
             {/* eq indicator */}

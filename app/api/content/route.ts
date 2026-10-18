@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
+import { Track, GalleryItem, BlogPost } from '../../../types';
 
 export async function POST(request: Request) {
   // Check if we are running in development mode
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
     const dbPath = path.join(process.cwd(), 'public', 'content.json');
     
     // Read current content.json
-    let dbContent: { tracks: any[]; gallery: any[]; posts: any[] } = {
+    let dbContent: { tracks: Track[]; gallery: GalleryItem[]; posts: BlogPost[] } = {
       tracks: [],
       gallery: [],
       posts: []
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
     try {
       const dbRaw = await fs.readFile(dbPath, 'utf-8');
       dbContent = JSON.parse(dbRaw);
-    } catch (e) {
+    } catch {
       // If content.json doesn't exist, we'll start with empty and write it
     }
 
@@ -179,8 +180,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: false, message: 'Invalid action' }, { status: 400 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in content API:', error);
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ success: false, message }, { status: 500 });
   }
 }

@@ -33,20 +33,12 @@
   ],
   "posts": [
     {
-      "id": "post1",
-      "title": "Chrome Heaven Portal Upgrade",
-      "date": "2026-07-15",
-      "content": "Welcome to the new Chrome Heaven blog and official portal!\n\nI have redesigned the layout to act as a direct blog and official page. I am transitioning away from external platforms like SoundCloud to host my own music and content.\n\nNow, all music tracks and photography edits will be served directly from this page. You can listen to my new tracks in the Windows Media Player window and view high-quality renders in the Visuals folder. More updates coming soon.",
-      "imageSrc": "/images/malice_ep_cover.png",
-      "audioSrc": "/audio/nevermind_190bpm_uloe.wav"
-    },
-    {
-      "id": "post2",
-      "title": "lonelystarr.wav Preview",
-      "date": "2026-07-10",
-      "content": "Here is a preview of my upcoming track 'lonelystarr'. It is a mix of electronic breakcore and dreamcore synth layers.\n\nYou can listen to the full WAV file by opening the Media Player window and selecting 'lonelystarr' from the playlist, or play it directly from this journal entry. Let me know what you think on my socials!",
-      "imageSrc": "/images/gallery_2.png",
-      "audioSrc": "/audio/lonelystarr.wav"
+      "id": "post_1790709360688",
+      "title": "Workinnn on my debutt EP or album",
+      "date": "2026-09-29",
+      "content": "I just wanna stay home 4ever doing this",
+      "imageSrc": "",
+      "audioSrc": ""
     }
   ]
 }

@@ -1,10 +1,11 @@
 'use client';
 import React from 'react';
+import { Wallpaper } from '../../types';
 
 interface SettingsContentProps {
-  wallpapers: any[];
-  currentWallpaper: any;
-  setCurrentWallpaper: (wp: any) => void;
+  wallpapers: Wallpaper[];
+  currentWallpaper: Wallpaper;
+  setCurrentWallpaper: (wp: Wallpaper) => void;
   closeWindow: (id: string) => void;
 }
 
