@@ -12,13 +12,11 @@ import {
   TextDocIcon,
   MediaPlayerIcon,
   IEIcon,
-  RecycleBinIcon,
   ImageFileIcon,
   BlogIcon,
 } from '../components/icons/Icons';
 
-import { DesktopShortcut } from '../components/desktop/DesktopShortcut';
-import { Taskbar } from '../components/desktop/Taskbar';
+import { IntroScreen } from '../components/desktop/IntroScreen';
 
 import { WelcomeContent } from '../components/windows/WelcomeContent';
 import { MediaPlayerContent } from '../components/windows/MediaPlayerContent';
@@ -44,8 +42,7 @@ export default function Home() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [selectedPostId, setSelectedPostId] = useState<string>('');
   const [activeWindowId, setActiveWindowId] = useState<string>('welcome');
-  const [selectedDesktopIcon, setSelectedDesktopIcon] = useState<string | null>(null);
-  const [startMenuOpen, setStartMenuOpen] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const [currentTrack, setCurrentTrack] = useState<Track>(DEFAULT_TRACKS[0]);
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
   const [currentWallpaper, setCurrentWallpaper] = useState(WALLPAPERS[0]);
@@ -277,7 +274,22 @@ export default function Home() {
       return win;
     }));
     setActiveWindowId(id);
-    setStartMenuOpen(false);
+  };
+
+  const handleIntroEnter = (id: string) => {
+    setShowIntro(false);
+
+    const routeMap: Record<string, string> = {
+      music: '/music',
+      gallery: '/gallery',
+      blog: '/diary',
+      links: '/links',
+      welcome: '/about',
+      settings: '/system',
+    };
+
+    const target = routeMap[id] ?? '/';
+    window.location.href = target;
   };
 
   const closeWindow = (id: string) => {
@@ -350,31 +362,20 @@ export default function Home() {
   };
 
   return (
-    <div
-      ref={desktopRef}
-      className="relative w-screen h-screen overflow-hidden flex flex-col"
-      style={{
-        backgroundColor: currentWallpaper.type === 'color' ? currentWallpaper.value : undefined,
-        backgroundImage: currentWallpaper.type !== 'color' ? currentWallpaper.value : undefined,
-        backgroundSize: currentWallpaper.type === 'cover' ? 'cover' : 'auto',
-        backgroundPosition: currentWallpaper.type === 'cover' ? 'center center' : '0 0',
-        backgroundRepeat: currentWallpaper.type === 'tile' ? 'repeat' : 'no-repeat',
-      }}
-      onClick={() => {
-        setSelectedDesktopIcon(null);
-        setStartMenuOpen(false);
-      }}
-    >
-      <div className="flex-1 relative p-4 flex flex-col flex-wrap content-start items-start gap-3 select-none">
-        
-        <DesktopShortcut id="welcome" title="Welcome.txt" icon={<TextDocIcon />} isSelected={selectedDesktopIcon === 'welcome'} onSelect={(e) => { e.stopPropagation(); setSelectedDesktopIcon('welcome'); }} onDoubleClick={() => openWindow('welcome')} />
-        <DesktopShortcut id="blog" title="My Diary" icon={<BlogIcon />} isSelected={selectedDesktopIcon === 'blog'} onSelect={(e) => { e.stopPropagation(); setSelectedDesktopIcon('blog'); }} onDoubleClick={() => openWindow('blog')} />
-        <DesktopShortcut id="music" title="Media Player" icon={<MediaPlayerIcon />} isSelected={selectedDesktopIcon === 'music'} onSelect={(e) => { e.stopPropagation(); setSelectedDesktopIcon('music'); }} onDoubleClick={() => openWindow('music')} />
-        <DesktopShortcut id="gallery" title="Visuals Folder" icon={<FolderIcon />} isSelected={selectedDesktopIcon === 'gallery'} onSelect={(e) => { e.stopPropagation(); setSelectedDesktopIcon('gallery'); }} onDoubleClick={() => openWindow('gallery')} />
-        <DesktopShortcut id="links" title="Internet Explorer" icon={<IEIcon />} isSelected={selectedDesktopIcon === 'links'} onSelect={(e) => { e.stopPropagation(); setSelectedDesktopIcon('links'); }} onDoubleClick={() => openWindow('links')} />
-        <DesktopShortcut id="settings" title="Display Properties" icon={<MyComputerIcon />} isSelected={selectedDesktopIcon === 'settings'} onSelect={(e) => { e.stopPropagation(); setSelectedDesktopIcon('settings'); }} onDoubleClick={() => openWindow('settings')} />
-        <DesktopShortcut id="recycle" title="Recycle Bin" icon={<RecycleBinIcon />} isSelected={selectedDesktopIcon === 'recycle'} onSelect={(e) => { e.stopPropagation(); setSelectedDesktopIcon('recycle'); }} onDoubleClick={() => alert("The Recycle Bin is empty.")} />
+    <>
+      {showIntro && <IntroScreen onEnter={handleIntroEnter} />}
 
+      <div
+        ref={desktopRef}
+        className="relative w-screen h-screen overflow-hidden flex flex-col"
+        style={{
+          backgroundColor: currentWallpaper.type === 'color' ? currentWallpaper.value : undefined,
+          backgroundImage: currentWallpaper.type !== 'color' ? currentWallpaper.value : undefined,
+          backgroundSize: currentWallpaper.type === 'cover' ? 'cover' : 'auto',
+          backgroundPosition: currentWallpaper.type === 'cover' ? 'center center' : '0 0',
+          backgroundRepeat: currentWallpaper.type === 'tile' ? 'repeat' : 'no-repeat',
+        }}
+      >
         {windows.map((win) => {
           if (!win.isOpen) return null;
           const isActive = activeWindowId === win.id;
@@ -427,9 +428,7 @@ export default function Home() {
 
               <div className={`flex-1 overflow-hidden flex flex-col ${win.id === 'links' ? 'p-0 bg-[#070509]' : 'p-1.5 bg-white'}`}>
                 <div className={`flex-1 ${win.id === 'links' ? 'overflow-hidden flex flex-col' : 'win2k-border-inset overflow-y-auto win2k-scroll text-black p-3 bg-white font-sans text-[12px] select-text'}`}>
-                  
                   {win.id === 'welcome' && <WelcomeContent openWindow={openWindow} />}
-                  
                   {win.id === 'music' && (
                     <MediaPlayerContent
                       tracks={tracks}
@@ -454,9 +453,7 @@ export default function Home() {
                   )}
 
                   {win.id === 'gallery' && <GalleryContent galleryItems={galleryItems} openImageViewer={openImageViewer} />}
-                  
                   {win.id === 'links' && <IEContent />}
-                  
                   {win.id === 'blog' && (
                     <BlogContent 
                       posts={posts}
@@ -477,7 +474,6 @@ export default function Home() {
                   )}
 
                   {win.id === 'viewer' && selectedImage && <ImageViewerContent selectedImage={selectedImage} />}
-
                 </div>
                 <div className="win2k-status-bar select-none">
                   <div className="win2k-status-field">Status: Active</div>
@@ -494,25 +490,6 @@ export default function Home() {
           );
         })}
       </div>
-
-      <Taskbar 
-        windows={windows} 
-        activeWindowId={activeWindowId} 
-        onStartMenuClick={(e) => { e.stopPropagation(); setStartMenuOpen(!startMenuOpen); }} 
-        startMenuOpen={startMenuOpen} 
-        onWindowTabClick={(id) => {
-          const win = windows.find(w => w.id === id);
-          if (win?.isMinimized) {
-            setWindows(prev => prev.map(w => w.id === id ? { ...w, isMinimized: false } : w));
-            setActiveWindowId(id);
-          } else if (activeWindowId === id) {
-            minimizeWindow(id);
-          } else {
-            setActiveWindowId(id);
-          }
-        }} 
-        openWindow={openWindow} 
-      />
-    </div>
+    </>
   );
 }
